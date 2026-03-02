@@ -185,10 +185,10 @@
       display: flex; align-items: center;
     }
     .match-time {
-      width: 55px; text-align: center; font-size: 11px; color: #888; flex-shrink: 0;
+      width: 50px; text-align: center; font-size: 13px; color: #888; flex-shrink: 0;
+      font-weight: 600;
     }
     .match-time.live-time { color: #e94560; font-weight: 700; animation: pulse 2s infinite; }
-    .match-time .uk-time { font-size: 10px; color: #aaa; display: block; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
     .match-teams { flex: 1; min-width: 0; }
@@ -206,10 +206,14 @@
     .match-team.loser .name { color: #aaa; }
 
     .match-status {
-      width: 55px; text-align: center; font-size: 10px; color: #888; flex-shrink: 0;
+      width: 70px; text-align: center; font-size: 11px; color: #888; flex-shrink: 0;
+      line-height: 1.3;
     }
     .match-status.ft { color: #2563eb; font-weight: 600; }
     .match-status.live { color: #e94560; font-weight: 700; }
+    .match-status.scheduled-time { color: #333; }
+    .match-status .time-uk { display: block; font-size: 12px; font-weight: 700; color: #2563eb; }
+    .match-status .time-venue { display: block; font-size: 11px; color: #16a34a; font-weight: 600; }
 
     /* Match Details (goals, cards) */
     .match-details {
@@ -217,7 +221,7 @@
       font-size: 11px; color: #666;
     }
     .match-detail-row {
-      display: flex; align-items: center; gap: 4px; padding: 1px 0 1px 55px;
+      display: flex; align-items: center; gap: 4px; padding: 1px 0 1px 50px;
     }
     .detail-icon { font-size: 12px; width: 16px; text-align: center; flex-shrink: 0; }
     .detail-minute { color: #999; font-size: 10px; min-width: 28px; }
@@ -432,14 +436,33 @@ function selectCalDate(y, m, d) {
   document.getElementById('calendarOverlay').classList.remove('show');
 }
 
-// ===== UK TIME =====
-function getUKTime(dateStr) {
+// ===== TIMEZONE HELPERS =====
+const LEAGUE_TZ = {
+  'eng.1':          { tz: 'Europe/London',   label: 'ENG' },
+  'esp.1':          { tz: 'Europe/Madrid',   label: 'ESP' },
+  'ger.1':          { tz: 'Europe/Berlin',   label: 'GER' },
+  'ita.1':          { tz: 'Europe/Rome',     label: 'ITA' },
+  'fra.1':          { tz: 'Europe/Paris',    label: 'FRA' },
+  'uefa.champions': { tz: 'Europe/London',   label: 'UK' },
+  'uefa.europa':    { tz: 'Europe/London',   label: 'UK' },
+  'fifa.world':     { tz: 'Europe/London',   label: 'UK' },
+};
+
+function getTimeInTZ(dateStr, timezone) {
   const d = new Date(dateStr);
-  return d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', timeZone:'Europe/London' });
+  return d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', timeZone: timezone });
+}
+function getUKTime(dateStr) {
+  return getTimeInTZ(dateStr, 'Europe/London');
 }
 function getLocalTime(dateStr) {
   const d = new Date(dateStr);
   return d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+}
+function getVenueTime(dateStr, leagueId) {
+  const info = LEAGUE_TZ[leagueId];
+  if (!info) return null;
+  return { time: getTimeInTZ(dateStr, info.tz), label: info.label };
 }
 
 // ===== FETCH =====
@@ -501,20 +524,24 @@ async function loadMatches() {
 
       // Time display
       let timeHtml = '';
+      let stClass = '', stText = '';
+
       if (isPre) {
-        const local = getLocalTime(event.date);
         const uk = getUKTime(event.date);
-        timeHtml = `${local}<span class="uk-time">UK ${uk}</span>`;
+        const venue = getVenueTime(event.date, league.espn);
+        timeHtml = '';  // left side empty for scheduled
+        stClass = 'scheduled-time';
+        stText = `<span class="time-uk">UK ${uk}</span>`;
+        if (venue && venue.label !== 'UK' && venue.label !== 'ENG') {
+          stText += `<span class="time-venue">${venue.label} ${venue.time}</span>`;
+        }
       } else if (isLive) {
         timeHtml = st?.displayClock || 'LIVE';
+        stClass = 'live'; stText = st?.type?.shortDetail || 'LIVE';
       } else {
         timeHtml = 'FT';
+        stClass = 'ft'; stText = st?.type?.shortDetail || 'FT';
       }
-
-      let stClass = '', stText = '';
-      if (isLive) { stClass = 'live'; stText = st?.type?.shortDetail || 'LIVE'; }
-      else if (isFinal) { stClass = 'ft'; stText = st?.type?.shortDetail || 'FT'; }
-      else { stText = 'Scheduled'; }
 
       // Match details (goals, cards)
       let detailsHtml = '';
