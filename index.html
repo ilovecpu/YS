@@ -8,10 +8,10 @@
   <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="YS Football">
   <link rel="apple-touch-icon" href="icon-192.png">
-  <meta name="theme-color" content="#1a1a2e">
+  <meta name="theme-color" content="#ffffff">
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -23,8 +23,8 @@
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0f0f23;
-      color: #e0e0e0;
+      background: #f0f2f5;
+      color: #1a1a1a;
       min-height: 100vh;
       min-height: 100dvh;
       overflow-x: hidden;
@@ -34,22 +34,23 @@
 
     /* Header */
     .header {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      background: #ffffff;
       padding: 12px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 2px solid #0f3460;
+      border-bottom: 2px solid #e0e0e0;
       position: sticky;
       top: 0;
       z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     }
     .header h1 {
       font-size: 18px;
       color: #e94560;
       font-weight: 700;
     }
-    .header h1 span { color: #4a90d9; }
+    .header h1 span { color: #2563eb; }
     .header-right {
       display: flex;
       align-items: center;
@@ -58,18 +59,19 @@
       color: #888;
     }
     .refresh-timer {
-      background: #1a1a3e;
+      background: #eef2ff;
       padding: 4px 10px;
       border-radius: 12px;
       font-size: 11px;
-      color: #4a90d9;
+      color: #2563eb;
+      font-weight: 600;
     }
 
     /* League Tabs */
     .league-tabs {
       display: flex;
       overflow-x: auto;
-      background: #16213e;
+      background: #ffffff;
       padding: 8px 8px 0;
       gap: 4px;
       -webkit-overflow-scrolling: touch;
@@ -79,22 +81,31 @@
     .league-tab {
       padding: 8px 16px;
       border-radius: 8px 8px 0 0;
-      background: #1a1a3e;
-      color: #888;
+      background: #f0f2f5;
+      color: #666;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
-      border: 1px solid transparent;
+      border: 1px solid #e0e0e0;
       border-bottom: none;
       transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .league-tab img {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
     }
     .league-tab.active {
-      background: #0f0f23;
-      color: #4a90d9;
-      border-color: #0f3460;
+      background: #f0f2f5;
+      color: #2563eb;
+      border-color: #2563eb;
+      border-bottom: 2px solid #f0f2f5;
     }
-    .league-tab:hover:not(.active) { color: #bbb; }
+    .league-tab:hover:not(.active) { color: #333; background: #e8eaed; }
 
     /* Date Navigator */
     .date-nav {
@@ -103,12 +114,12 @@
       justify-content: center;
       gap: 12px;
       padding: 12px;
-      background: #1a1a2e;
-      border-bottom: 1px solid #0f3460;
+      background: #ffffff;
+      border-bottom: 1px solid #e0e0e0;
     }
     .date-btn {
-      background: #0f3460;
-      color: #4a90d9;
+      background: #eef2ff;
+      color: #2563eb;
       border: none;
       width: 36px;
       height: 36px;
@@ -120,14 +131,19 @@
       justify-content: center;
       transition: background 0.2s;
     }
-    .date-btn:hover { background: #1a4a7a; }
+    .date-btn:hover { background: #dbeafe; }
     .date-display {
       font-size: 15px;
       font-weight: 600;
-      color: #e0e0e0;
+      color: #1a1a1a;
       min-width: 180px;
       text-align: center;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: background 0.2s;
     }
+    .date-display:hover { background: #eef2ff; }
     .today-btn {
       background: #e94560;
       color: white;
@@ -140,29 +156,116 @@
     }
     .today-btn:hover { background: #d63050; }
 
+    /* Calendar Overlay */
+    .calendar-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.3);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+    }
+    .calendar-overlay.show { display: flex; }
+
+    .calendar {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      width: 320px;
+      max-width: 90vw;
+    }
+    .cal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .cal-header .cal-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    .cal-nav {
+      background: #eef2ff;
+      color: #2563eb;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cal-nav:hover { background: #dbeafe; }
+    .cal-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-size: 12px;
+      color: #999;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .cal-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+    .cal-day {
+      width: 100%;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: #333;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .cal-day:hover { background: #eef2ff; }
+    .cal-day.today {
+      border: 2px solid #2563eb;
+      font-weight: 700;
+    }
+    .cal-day.selected {
+      background: #2563eb;
+      color: white;
+      font-weight: 700;
+    }
+    .cal-day.other-month { color: #ccc; }
+    .cal-day.empty { cursor: default; }
+
     /* View Toggle */
     .view-toggle {
       display: flex;
       justify-content: center;
       gap: 4px;
       padding: 10px;
-      background: #0f0f23;
+      background: #f0f2f5;
     }
     .view-btn {
       padding: 8px 24px;
       border-radius: 20px;
-      background: #1a1a3e;
-      color: #888;
-      border: 1px solid #0f3460;
+      background: #ffffff;
+      color: #666;
+      border: 1px solid #ddd;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
     }
     .view-btn.active {
-      background: #0f3460;
-      color: #4a90d9;
-      border-color: #4a90d9;
+      background: #2563eb;
+      color: white;
+      border-color: #2563eb;
     }
 
     /* Content Area */
@@ -176,9 +279,9 @@
     .match-group-title {
       font-size: 14px;
       font-weight: 700;
-      color: #4a90d9;
+      color: #2563eb;
       padding: 12px 0 8px;
-      border-bottom: 1px solid #1a1a3e;
+      border-bottom: 1px solid #e0e0e0;
       margin-bottom: 8px;
       display: flex;
       align-items: center;
@@ -190,16 +293,17 @@
     }
 
     .match-card {
-      background: #16213e;
+      background: #ffffff;
       border-radius: 10px;
       padding: 12px 16px;
       margin-bottom: 6px;
       display: flex;
       align-items: center;
-      border: 1px solid #1a1a3e;
+      border: 1px solid #e8e8e8;
       transition: border-color 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
-    .match-card:hover { border-color: #0f3460; }
+    .match-card:hover { border-color: #c0c0c0; }
     .match-card.live { border-left: 3px solid #e94560; }
 
     .match-time {
@@ -240,16 +344,17 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      color: #333;
     }
     .match-team .score {
       font-weight: 700;
       font-size: 16px;
       width: 24px;
       text-align: center;
-      color: #fff;
+      color: #1a1a1a;
     }
-    .match-team.winner .name { color: #fff; font-weight: 600; }
-    .match-team.loser .name { color: #666; }
+    .match-team.winner .name { color: #1a1a1a; font-weight: 600; }
+    .match-team.loser .name { color: #aaa; }
 
     .match-status {
       width: 70px;
@@ -258,7 +363,7 @@
       color: #888;
       flex-shrink: 0;
     }
-    .match-status.ft { color: #4a90d9; font-weight: 600; }
+    .match-status.ft { color: #2563eb; font-weight: 600; }
     .match-status.live { color: #e94560; font-weight: 700; }
 
     /* Standings Table */
@@ -266,10 +371,14 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 13px;
+      background: #ffffff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
     .standings-table th {
-      background: #16213e;
-      color: #4a90d9;
+      background: #f8f9fa;
+      color: #2563eb;
       padding: 10px 8px;
       text-align: center;
       font-weight: 600;
@@ -281,10 +390,11 @@
     .standings-table td {
       padding: 8px;
       text-align: center;
-      border-bottom: 1px solid #1a1a3e;
+      border-bottom: 1px solid #f0f0f0;
+      color: #333;
     }
     .standings-table td:nth-child(2) { text-align: left; }
-    .standings-table tr:hover td { background: #16213e; }
+    .standings-table tr:hover td { background: #f8f9ff; }
     .standings-table .team-cell {
       display: flex;
       align-items: center;
@@ -296,10 +406,10 @@
     }
     .standings-table .pos-1, .standings-table .pos-2,
     .standings-table .pos-3, .standings-table .pos-4 {
-      border-left: 3px solid #4a90d9;
+      border-left: 3px solid #2563eb;
     }
     .standings-table .pos-rel { border-left: 3px solid #e94560; }
-    .standings-table .pts { color: #4a90d9; font-weight: 700; }
+    .standings-table .pts { color: #2563eb; font-weight: 700; }
 
     /* Loading & Empty */
     .loading {
@@ -310,8 +420,8 @@
     .loading .spinner {
       width: 40px;
       height: 40px;
-      border: 3px solid #1a1a3e;
-      border-top-color: #4a90d9;
+      border: 3px solid #e0e0e0;
+      border-top-color: #2563eb;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
       margin: 0 auto 16px;
@@ -321,7 +431,7 @@
     .no-matches {
       text-align: center;
       padding: 60px 20px;
-      color: #666;
+      color: #999;
       font-size: 15px;
     }
     .no-matches .icon { font-size: 48px; margin-bottom: 12px; }
@@ -330,7 +440,7 @@
     .footer {
       text-align: center;
       padding: 20px;
-      color: #444;
+      color: #bbb;
       font-size: 11px;
     }
 
@@ -360,9 +470,25 @@
   <!-- Date Navigator -->
   <div class="date-nav">
     <button class="date-btn" onclick="changeDate(-1)">◀</button>
-    <span class="date-display" id="dateDisplay"></span>
+    <span class="date-display" id="dateDisplay" onclick="openCalendar()"></span>
     <button class="date-btn" onclick="changeDate(1)">▶</button>
     <button class="today-btn" onclick="goToday()">Today</button>
+  </div>
+
+  <!-- Calendar Overlay -->
+  <div class="calendar-overlay" id="calendarOverlay" onclick="closeCalendar(event)">
+    <div class="calendar" onclick="event.stopPropagation()">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="calChangeMonth(-1)">◀</button>
+        <span class="cal-title" id="calTitle"></span>
+        <button class="cal-nav" onclick="calChangeMonth(1)">▶</button>
+      </div>
+      <div class="cal-weekdays">
+        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div>
+        <div>Thu</div><div>Fri</div><div>Sat</div>
+      </div>
+      <div class="cal-days" id="calDays"></div>
+    </div>
   </div>
 
   <!-- View Toggle -->
@@ -381,15 +507,15 @@
 <script>
 // ===== CONFIG =====
 const LEAGUES = [
-  { id: 'all',              name: 'All',   espn: null },
-  { id: 'eng.1',            name: 'EPL',   espn: 'eng.1' },
-  { id: 'esp.1',            name: 'LIGA',  espn: 'esp.1' },
-  { id: 'ger.1',            name: 'BL',    espn: 'ger.1' },
-  { id: 'ita.1',            name: 'SA',    espn: 'ita.1' },
-  { id: 'fra.1',            name: 'L1',    espn: 'fra.1' },
-  { id: 'uefa.champions',   name: 'UCL',   espn: 'uefa.champions' },
-  { id: 'uefa.europa',      name: 'UEL',   espn: 'uefa.europa' },
-  { id: 'fifa.world',       name: 'WC',    espn: 'fifa.world' },
+  { id: 'all',              name: 'All',   espn: null, logo: '' },
+  { id: 'eng.1',            name: 'EPL',   espn: 'eng.1',          logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/23.png' },
+  { id: 'esp.1',            name: 'LIGA',  espn: 'esp.1',          logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/15.png' },
+  { id: 'ger.1',            name: 'BL',    espn: 'ger.1',          logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/10.png' },
+  { id: 'ita.1',            name: 'SA',    espn: 'ita.1',          logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/12.png' },
+  { id: 'fra.1',            name: 'L1',    espn: 'fra.1',          logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/9.png' },
+  { id: 'uefa.champions',   name: 'UCL',   espn: 'uefa.champions', logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/2.png' },
+  { id: 'uefa.europa',      name: 'UEL',   espn: 'uefa.europa',    logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/2310.png' },
+  { id: 'fifa.world',       name: 'WC',    espn: 'fifa.world',     logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/4.png' },
 ];
 
 const ALL_SINGLE_LEAGUES = LEAGUES.filter(l => l.espn !== null);
@@ -399,6 +525,7 @@ let currentView = 'matches';
 let currentDate = new Date();
 let refreshInterval = null;
 let refreshCount = 60;
+let calViewDate = new Date();
 
 // ===== INIT =====
 function init() {
@@ -413,7 +540,10 @@ function renderTabs() {
   const container = document.getElementById('leagueTabs');
   container.innerHTML = LEAGUES.map(l =>
     `<div class="league-tab ${l.id === currentLeague ? 'active' : ''}"
-          onclick="selectLeague('${l.id}')">${l.name}</div>`
+          onclick="selectLeague('${l.id}')">
+      ${l.logo ? `<img src="${l.logo}" alt="" onerror="this.style.display='none'">` : ''}
+      ${l.name}
+    </div>`
   ).join('');
 }
 
@@ -441,7 +571,7 @@ function updateDateDisplay() {
   const today = new Date();
   const isToday = currentDate.toDateString() === today.toDateString();
   document.getElementById('dateDisplay').textContent =
-    (isToday ? '📅 Today - ' : '') + formatDate(currentDate);
+    (isToday ? '📅 Today - ' : '📅 ') + formatDate(currentDate);
 }
 
 function changeDate(delta) {
@@ -454,6 +584,71 @@ function goToday() {
   currentDate = new Date();
   updateDateDisplay();
   loadData();
+}
+
+// ===== CALENDAR =====
+function openCalendar() {
+  calViewDate = new Date(currentDate);
+  renderCalendar();
+  document.getElementById('calendarOverlay').classList.add('show');
+}
+
+function closeCalendar(e) {
+  if (e && e.target !== document.getElementById('calendarOverlay')) return;
+  document.getElementById('calendarOverlay').classList.remove('show');
+}
+
+function calChangeMonth(delta) {
+  calViewDate.setMonth(calViewDate.getMonth() + delta);
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const months = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  const year = calViewDate.getFullYear();
+  const month = calViewDate.getMonth();
+
+  document.getElementById('calTitle').textContent = `${months[month]} ${year}`;
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrev = new Date(year, month, 0).getDate();
+
+  const today = new Date();
+  let html = '';
+
+  // Previous month padding
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const d = daysInPrev - i;
+    html += `<button class="cal-day other-month" onclick="selectCalDate(${year},${month - 1},${d})">${d}</button>`;
+  }
+
+  // Current month
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = (d === today.getDate() && month === today.getMonth() && year === today.getFullYear());
+    const isSelected = (d === currentDate.getDate() && month === currentDate.getMonth() && year === currentDate.getFullYear());
+    let cls = 'cal-day';
+    if (isToday) cls += ' today';
+    if (isSelected) cls += ' selected';
+    html += `<button class="${cls}" onclick="selectCalDate(${year},${month},${d})">${d}</button>`;
+  }
+
+  // Next month padding
+  const totalCells = firstDay + daysInMonth;
+  const remaining = (7 - (totalCells % 7)) % 7;
+  for (let d = 1; d <= remaining; d++) {
+    html += `<button class="cal-day other-month" onclick="selectCalDate(${year},${month + 1},${d})">${d}</button>`;
+  }
+
+  document.getElementById('calDays').innerHTML = html;
+}
+
+function selectCalDate(year, month, day) {
+  currentDate = new Date(year, month, day);
+  updateDateDisplay();
+  loadData();
+  document.getElementById('calendarOverlay').classList.remove('show');
 }
 
 // ===== VIEW =====
@@ -551,7 +746,6 @@ async function loadMatches() {
       const homeWin = isFinal && homeScore > awayScore;
       const awayWin = isFinal && awayScore > homeScore;
 
-      // Time display
       let timeDisplay = '';
       if (isPre) {
         const d = new Date(event.date);
@@ -562,7 +756,6 @@ async function loadMatches() {
         timeDisplay = 'FT';
       }
 
-      // Status display
       let statusClass = '';
       let statusText = '';
       if (isLive) {
@@ -610,7 +803,7 @@ async function loadStandings() {
 
   let league;
   if (currentLeague === 'all') {
-    league = LEAGUES.find(l => l.id === 'eng.1'); // Default to EPL
+    league = LEAGUES.find(l => l.id === 'eng.1');
   } else {
     league = LEAGUES.find(l => l.id === currentLeague);
   }
@@ -627,7 +820,6 @@ async function loadStandings() {
     return;
   }
 
-  // Get the first standings group (usually total standings)
   const group = data.children[0];
   const standings = group?.standings?.entries || [];
 
@@ -636,7 +828,6 @@ async function loadStandings() {
     return;
   }
 
-  // Sort by rank
   standings.sort((a, b) => {
     const rankA = a.stats?.find(s => s.name === 'rank')?.value || 99;
     const rankB = b.stats?.find(s => s.name === 'rank')?.value || 99;
@@ -675,7 +866,6 @@ async function loadStandings() {
     const gd = stats.pointDifferential || stats.goalDifference || 0;
     const pts = stats.points || 0;
 
-    // Highlight positions
     let posClass = '';
     if (rank <= 4) posClass = `pos-${rank}`;
     if (rank > totalTeams - 3) posClass = 'pos-rel';
@@ -718,12 +908,10 @@ function startRefreshTimer() {
 }
 
 // ===== KIOSK MODE =====
-// Block all external links - stay inside the app
 document.addEventListener('click', function(e) {
   const link = e.target.closest('a');
   if (link) {
     const href = link.getAttribute('href');
-    // Block any link that goes outside this app
     if (href && (href.startsWith('http') || href.startsWith('//') || href.startsWith('mailto'))) {
       e.preventDefault();
       e.stopPropagation();
@@ -732,37 +920,28 @@ document.addEventListener('click', function(e) {
   }
 }, true);
 
-// Block window.open (prevents pop-ups & new tabs)
 window.open = function() { return null; };
 
-// Block right-click context menu
 document.addEventListener('contextmenu', function(e) {
   e.preventDefault();
   return false;
 });
 
-// Block long-press context menu on iOS
 document.addEventListener('touchstart', function(e) {}, { passive: true });
 
-// Block keyboard shortcuts for new tab (Ctrl+T, Ctrl+N, etc.)
 document.addEventListener('keydown', function(e) {
   if (e.ctrlKey || e.metaKey) {
-    // Block Ctrl+T (new tab), Ctrl+N (new window), Ctrl+L (address bar)
     if (['t','n','l','w'].includes(e.key.toLowerCase())) {
       e.preventDefault();
       return false;
     }
   }
-  // Block F5 refresh to avoid navigation issues
-  // (app has its own auto-refresh)
 });
 
-// Block drag & drop (prevents dragging links to open)
 document.addEventListener('dragstart', function(e) {
   e.preventDefault();
 });
 
-// Request fullscreen on first touch (iPad needs user gesture)
 let fullscreenRequested = false;
 document.addEventListener('click', function() {
   if (!fullscreenRequested && document.documentElement.requestFullscreen) {
@@ -774,15 +953,9 @@ document.addEventListener('click', function() {
   }
 }, { once: true });
 
-// Prevent pinch-to-zoom
-document.addEventListener('gesturestart', function(e) {
-  e.preventDefault();
-});
-document.addEventListener('gesturechange', function(e) {
-  e.preventDefault();
-});
+document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+document.addEventListener('gesturechange', function(e) { e.preventDefault(); });
 
-// Block back/forward navigation gestures
 window.addEventListener('popstate', function() {
   history.pushState(null, '', window.location.href);
 });
