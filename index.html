@@ -441,6 +441,37 @@
     .no-matches { text-align: center; padding: 40px 16px; color: #999; font-size: 14px; }
     .no-matches .icon { font-size: 40px; margin-bottom: 10px; }
 
+    /* Screen Time Alert */
+    .screen-alert-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7); z-index: 500;
+      justify-content: center; align-items: center;
+    }
+    .screen-alert-overlay.show { display: flex; }
+    .screen-alert-box {
+      background: #fff; border-radius: 20px; padding: 30px 24px; text-align: center;
+      width: 340px; max-width: 90vw;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.3);
+      animation: alertBounce 0.4s ease-out;
+    }
+    @keyframes alertBounce {
+      0% { transform: scale(0.7); opacity: 0; }
+      60% { transform: scale(1.05); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .screen-alert-icon { font-size: 50px; margin-bottom: 12px; }
+    .screen-alert-msg {
+      font-size: 18px; font-weight: 700; color: #1a1a1a;
+      line-height: 1.6; margin-bottom: 8px;
+    }
+    .screen-alert-sub { font-size: 13px; color: #888; margin-bottom: 20px; }
+    .screen-alert-btn {
+      background: #2563eb; color: #fff; border: none;
+      padding: 12px 40px; border-radius: 30px; font-size: 16px;
+      font-weight: 700; cursor: pointer; transition: background 0.2s;
+    }
+    .screen-alert-btn:hover { background: #1d4ed8; }
+
     /* Footer */
     .footer { text-align: center; padding: 16px; color: #bbb; font-size: 11px; }
 
@@ -515,6 +546,16 @@
       <div class="panel-body" id="standingsPanel">
         <div class="loading"><div class="spinner"></div>Loading...</div>
       </div>
+    </div>
+  </div>
+
+  <!-- Screen Time Alert -->
+  <div class="screen-alert-overlay" id="screenAlertOverlay">
+    <div class="screen-alert-box">
+      <div class="screen-alert-icon">⏰</div>
+      <div class="screen-alert-msg" id="screenAlertMsg">연성아 너무 오래 보고 있다..<br>여기까지만 봐</div>
+      <div class="screen-alert-sub" id="screenAlertSub"></div>
+      <button class="screen-alert-btn" onclick="dismissScreenAlert()">OK</button>
     </div>
   </div>
 
@@ -1332,6 +1373,86 @@ document.addEventListener('gesturestart', e => e.preventDefault());
 document.addEventListener('gesturechange', e => e.preventDefault());
 window.addEventListener('popstate', () => history.pushState(null,'',window.location.href));
 history.pushState(null,'',window.location.href);
+
+// ===== SCREEN TIME GUARDIAN =====
+// 20분 연속 사용 시 첫 경고, OK 누른 후 1분마다 반복
+// 1시간 이상 비활성(탭 숨김/화면꺼짐) 시 타이머 리셋
+const SCREEN_FIRST_ALERT = 20 * 60 * 1000;   // 20분
+const SCREEN_REPEAT_ALERT = 1 * 60 * 1000;    // 1분
+const SCREEN_IDLE_RESET = 60 * 60 * 1000;     // 1시간
+
+let screenStartTime = Date.now();
+let screenAlertTimer = null;
+let screenAlertCount = 0;
+let screenHiddenTime = null;
+
+function startScreenTimer() {
+  clearTimeout(screenAlertTimer);
+  screenStartTime = Date.now();
+  screenAlertCount = 0;
+  scheduleScreenAlert(SCREEN_FIRST_ALERT);
+}
+
+function scheduleScreenAlert(delay) {
+  clearTimeout(screenAlertTimer);
+  screenAlertTimer = setTimeout(() => {
+    showScreenAlert();
+  }, delay);
+}
+
+function showScreenAlert() {
+  screenAlertCount++;
+  const totalMin = Math.round((Date.now() - screenStartTime) / 60000);
+  const overlay = document.getElementById('screenAlertOverlay');
+  const msg = document.getElementById('screenAlertMsg');
+  const sub = document.getElementById('screenAlertSub');
+
+  if (screenAlertCount === 1) {
+    msg.innerHTML = '연성아 너무 오래 보고 있다..<br>여기까지만 봐';
+  } else if (screenAlertCount <= 3) {
+    msg.innerHTML = '연성아~ 아직도 보고 있네?<br>이제 그만 봐!';
+  } else {
+    msg.innerHTML = '연성아!! 진짜 그만 봐!! 😤<br>눈 나빠진다!';
+  }
+  sub.textContent = `${totalMin}분째 보고 있어요`;
+  overlay.classList.add('show');
+}
+
+function dismissScreenAlert() {
+  document.getElementById('screenAlertOverlay').classList.remove('show');
+  // OK 누른 후 1분 뒤 다시 알림
+  scheduleScreenAlert(SCREEN_REPEAT_ALERT);
+}
+
+// 탭 숨김/표시 감지 (화면 꺼짐, 다른 앱 전환 등)
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    // 화면 안 보기 시작
+    screenHiddenTime = Date.now();
+    clearTimeout(screenAlertTimer);
+  } else {
+    // 다시 돌아옴
+    if (screenHiddenTime) {
+      const away = Date.now() - screenHiddenTime;
+      if (away >= SCREEN_IDLE_RESET) {
+        // 1시간 이상 안 봤으면 완전 리셋
+        startScreenTimer();
+      } else {
+        // 잠깐 나갔다 왔으면 남은 시간 계속
+        const elapsed = Date.now() - screenStartTime;
+        if (screenAlertCount === 0 && elapsed < SCREEN_FIRST_ALERT) {
+          scheduleScreenAlert(SCREEN_FIRST_ALERT - elapsed);
+        } else if (screenAlertCount > 0) {
+          scheduleScreenAlert(SCREEN_REPEAT_ALERT);
+        }
+      }
+      screenHiddenTime = null;
+    }
+  }
+});
+
+// 시작
+startScreenTimer();
 
 // ===== SERVICE WORKER =====
 if ('serviceWorker' in navigator) {
