@@ -51,6 +51,28 @@
       background: #eef2ff; padding: 4px 10px; border-radius: 12px;
       font-size: 11px; color: #2563eb; font-weight: 600;
     }
+    .refresh-btn {
+      background: #2563eb; color: #fff; border: none;
+      width: 30px; height: 30px; border-radius: 50%; font-size: 16px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: transform 0.3s;
+    }
+    .refresh-btn:hover { background: #1d4ed8; }
+    .refresh-btn.spinning { animation: spin 0.8s linear infinite; }
+
+    /* World Cup D-day Banner */
+    .wc-banner {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #e94560 100%);
+      color: #fff; text-align: center; padding: 8px 16px;
+      font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .wc-banner .wc-icon { font-size: 18px; }
+    .wc-banner .wc-dday {
+      background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 12px;
+      font-size: 14px; font-weight: 700; letter-spacing: 0.5px;
+    }
+    .wc-banner .wc-dday.past { background: rgba(233,69,96,0.4); }
 
     /* League Tabs */
     .league-tabs {
@@ -95,35 +117,67 @@
     /* Calendar Overlay */
     .calendar-overlay {
       display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.3); z-index: 200;
-      justify-content: center; align-items: center;
+      background: rgba(0,0,0,0.35); z-index: 200;
+      justify-content: center; align-items: flex-start;
+      padding-top: 40px;
+      overflow-y: auto;
     }
     .calendar-overlay.show { display: flex; }
     .calendar {
       background: #fff; border-radius: 16px; padding: 20px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.15); width: 320px; max-width: 90vw;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      width: 700px; max-width: 95vw;
+      margin-bottom: 40px;
     }
     .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .cal-header .cal-title { font-size: 17px; font-weight: 700; color: #1a1a1a; }
+    .cal-header .cal-title { font-size: 18px; font-weight: 700; color: #1a1a1a; }
     .cal-nav {
       background: #eef2ff; color: #2563eb; border: none;
-      width: 32px; height: 32px; border-radius: 50%; font-size: 16px;
+      width: 34px; height: 34px; border-radius: 50%; font-size: 16px;
       cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
+    .cal-loading { text-align: center; padding: 8px; font-size: 12px; color: #888; }
     .cal-weekdays {
       display: grid; grid-template-columns: repeat(7, 1fr);
-      text-align: center; font-size: 12px; color: #999; font-weight: 600; margin-bottom: 8px;
+      text-align: center; font-size: 12px; color: #999; font-weight: 600; margin-bottom: 4px;
     }
-    .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-    .cal-day {
-      width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
-      border-radius: 50%; font-size: 14px; cursor: pointer; border: none;
-      background: transparent; color: #333; font-weight: 500;
+    .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+    .cal-cell {
+      min-height: 80px; border: 1px solid #f0f0f0; border-radius: 8px;
+      padding: 4px; cursor: pointer; transition: all 0.15s;
+      background: #fff; overflow: hidden;
     }
-    .cal-day:hover { background: #eef2ff; }
-    .cal-day.today { border: 2px solid #2563eb; font-weight: 700; }
-    .cal-day.selected { background: #2563eb; color: white; font-weight: 700; }
-    .cal-day.other-month { color: #ccc; }
+    .cal-cell:hover { border-color: #2563eb; background: #f8f9ff; }
+    .cal-cell.today { border: 2px solid #2563eb; }
+    .cal-cell.selected { background: #eef2ff; border-color: #2563eb; }
+    .cal-cell.other-month { background: #fafafa; opacity: 0.5; }
+    .cal-cell .cal-date {
+      font-size: 13px; font-weight: 600; color: #333;
+      padding: 2px 4px; display: inline-block;
+    }
+    .cal-cell.today .cal-date {
+      background: #2563eb; color: #fff; border-radius: 50%; width: 24px; height: 24px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cal-cell.selected .cal-date { color: #2563eb; }
+    .cal-matches { margin-top: 2px; }
+    .cal-match {
+      font-size: 9px; color: #555; padding: 1px 3px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      line-height: 1.4; border-radius: 3px; cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .cal-match:hover { opacity: 0.7; }
+    .cal-match.cal-live { background: #fee2e2; color: #dc2626; font-weight: 600; }
+    .cal-match.cal-final { background: #f0f0f0; color: #555; }
+    .cal-match.cal-scheduled { background: #eef2ff; color: #2563eb; }
+    .cal-more { font-size: 9px; color: #2563eb; font-weight: 600; padding: 1px 3px; }
+
+    @media (max-width: 600px) {
+      .calendar { width: 98vw; padding: 12px; }
+      .cal-cell { min-height: 60px; }
+      .cal-match { font-size: 8px; }
+    }
 
     /* Main Layout: Side by Side */
     .main-layout {
@@ -215,11 +269,22 @@
     .match-status .time-uk { display: block; font-size: 12px; font-weight: 700; color: #2563eb; }
     .match-status .time-venue { display: block; font-size: 11px; color: #16a34a; font-weight: 600; }
 
+    /* Match Card clickable */
+    .match-card.clickable { cursor: pointer; }
+    .match-card.clickable:hover { border-color: #2563eb; background: #fafbff; }
+    .match-card .match-expand-hint {
+      font-size: 10px; color: #bbb; text-align: center; margin-top: 2px;
+      transition: opacity 0.2s;
+    }
+    .match-card.expanded .match-expand-hint { display: none; }
+
     /* Match Details (goals, cards) */
     .match-details {
       margin-top: 6px; padding-top: 6px; border-top: 1px dashed #eee;
       font-size: 11px; color: #666;
+      display: none; /* hidden by default */
     }
+    .match-card.expanded .match-details { display: block; }
     .match-detail-row {
       display: flex; align-items: center; gap: 4px; padding: 1px 0 1px 50px;
     }
@@ -229,6 +294,122 @@
     .detail-yellow { color: #f59e0b; }
     .detail-red { color: #dc2626; }
     .detail-goal { color: #2563eb; font-weight: 600; }
+
+    /* Match Detail Modal */
+    .detail-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); z-index: 300;
+      justify-content: center; align-items: flex-start;
+      padding-top: 30px; overflow-y: auto;
+    }
+    .detail-overlay.show { display: flex; }
+    .detail-modal {
+      background: #fff; border-radius: 16px;
+      width: 560px; max-width: 95vw; margin-bottom: 40px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25); overflow: hidden;
+    }
+    .detail-modal-close {
+      position: absolute; top: 10px; right: 14px;
+      background: rgba(255,255,255,0.3); border: none; color: #fff;
+      width: 32px; height: 32px; border-radius: 50%; font-size: 18px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .detail-score-header {
+      background: linear-gradient(135deg, #1e3a5f, #2563eb);
+      color: #fff; padding: 20px 16px; text-align: center; position: relative;
+    }
+    .detail-league-name { font-size: 11px; opacity: 0.8; margin-bottom: 8px; }
+    .detail-teams-row {
+      display: flex; align-items: center; justify-content: center; gap: 16px;
+    }
+    .detail-team-col { text-align: center; flex: 1; max-width: 140px; }
+    .detail-team-col img { width: 48px; height: 48px; margin-bottom: 4px; }
+    .detail-team-col .t-name { font-size: 13px; font-weight: 600; }
+    .detail-score-box {
+      font-size: 36px; font-weight: 800; letter-spacing: 4px;
+      min-width: 80px; text-align: center;
+    }
+    .detail-score-box .score-sep { opacity: 0.5; margin: 0 2px; }
+    .detail-match-info { font-size: 11px; opacity: 0.8; margin-top: 8px; }
+
+    .detail-tabs {
+      display: flex; border-bottom: 2px solid #e0e0e0; background: #f8f9fa;
+    }
+    .detail-tab {
+      flex: 1; text-align: center; padding: 10px 8px; font-size: 12px;
+      font-weight: 600; color: #888; cursor: pointer; border-bottom: 2px solid transparent;
+      margin-bottom: -2px; transition: all 0.2s;
+    }
+    .detail-tab.active { color: #2563eb; border-bottom-color: #2563eb; }
+    .detail-tab:hover:not(.active) { color: #333; }
+
+    .detail-tab-content { display: none; padding: 12px 16px; max-height: 50vh; overflow-y: auto; }
+    .detail-tab-content.active { display: block; }
+
+    /* Stats bars */
+    .stat-row {
+      display: flex; align-items: center; gap: 8px; padding: 6px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .stat-val { width: 36px; text-align: center; font-size: 13px; font-weight: 700; color: #333; }
+    .stat-label { flex: 1; text-align: center; font-size: 11px; color: #888; font-weight: 600; }
+    .stat-bar-wrap { flex: 2; height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; }
+    .stat-bar-wrap.left { direction: rtl; }
+    .stat-bar {
+      height: 100%; border-radius: 3px; transition: width 0.5s;
+    }
+    .stat-bar.home { background: #2563eb; }
+    .stat-bar.away { background: #e94560; }
+
+    /* Events timeline */
+    .event-row {
+      display: flex; align-items: center; gap: 8px; padding: 5px 0;
+      font-size: 12px; border-bottom: 1px solid #f8f8f8;
+    }
+    .event-min { width: 32px; color: #999; font-size: 11px; font-weight: 600; text-align: right; flex-shrink: 0; }
+    .event-icon { font-size: 14px; width: 20px; text-align: center; flex-shrink: 0; }
+    .event-text { flex: 1; color: #333; }
+    .event-team-tag {
+      font-size: 9px; padding: 1px 5px; border-radius: 8px;
+      font-weight: 600; flex-shrink: 0;
+    }
+    .event-team-tag.home { background: #eef2ff; color: #2563eb; }
+    .event-team-tag.away { background: #fef2f2; color: #e94560; }
+
+    /* Lineups */
+    .lineup-section { margin-bottom: 12px; }
+    .lineup-title {
+      font-size: 13px; font-weight: 700; padding: 6px 0; color: #2563eb;
+      border-bottom: 1px solid #e0e0e0; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .lineup-title img { width: 18px; height: 18px; }
+    .lineup-formation { font-size: 11px; color: #888; font-weight: 400; }
+    .lineup-player {
+      display: flex; align-items: center; gap: 6px; padding: 3px 0;
+      font-size: 12px; color: #333;
+    }
+    .lineup-number {
+      width: 22px; height: 22px; border-radius: 50%; background: #eef2ff;
+      color: #2563eb; font-size: 10px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .lineup-sub-label {
+      font-size: 11px; color: #999; font-weight: 600; padding: 6px 0 3px;
+      border-top: 1px dashed #eee; margin-top: 6px;
+    }
+    .detail-loading { text-align: center; padding: 40px; color: #888; }
+    .detail-loading .spinner {
+      width: 30px; height: 30px; border: 3px solid #e0e0e0;
+      border-top-color: #2563eb; border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 10px;
+    }
+
+    @media (max-width: 600px) {
+      .detail-modal { width: 98vw; }
+      .detail-score-box { font-size: 28px; }
+      .detail-team-col img { width: 36px; height: 36px; }
+    }
 
     /* Standings Table */
     .standings-table { width: 100%; border-collapse: collapse; font-size: 12px; }
@@ -274,11 +455,15 @@
 </head>
 <body>
 
+  <!-- World Cup D-day Banner -->
+  <div class="wc-banner" id="wcBanner"></div>
+
   <div class="header">
     <h1>⚽ Football Info for <span>Yeon-Sung</span></h1>
     <div class="header-right">
       <span id="dataSource">ESPN</span>
       <span class="refresh-timer" id="refreshTimer">60s</span>
+      <button class="refresh-btn" id="refreshBtn" onclick="manualRefresh()" title="Refresh">🔄</button>
     </div>
   </div>
 
@@ -303,7 +488,17 @@
         <div>Su</div><div>Mo</div><div>Tu</div><div>We</div>
         <div>Th</div><div>Fr</div><div>Sa</div>
       </div>
+      <div class="cal-loading" id="calLoading" style="display:none;">Loading matches...</div>
       <div class="cal-days" id="calDays"></div>
+    </div>
+  </div>
+
+  <!-- Match Detail Modal -->
+  <div class="detail-overlay" id="detailOverlay" onclick="closeDetail(event)">
+    <div class="detail-modal" id="detailModal" onclick="event.stopPropagation()">
+      <div id="detailContent">
+        <div class="detail-loading"><div class="spinner"></div>Loading match details...</div>
+      </div>
     </div>
   </div>
 
@@ -345,7 +540,53 @@ let refreshInterval = null;
 let refreshCount = 60;
 let calViewDate = new Date();
 
+// ===== WORLD CUP D-DAY =====
+// FIFA World Cup 2026 kicks off June 11, 2026
+const WC_DATE = new Date(2026, 5, 11); // June 11, 2026
+function updateWCBanner() {
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  const wcDay = new Date(WC_DATE);
+  wcDay.setHours(0,0,0,0);
+  const diff = Math.ceil((wcDay - now) / (1000*60*60*24));
+  const banner = document.getElementById('wcBanner');
+
+  if (diff > 0) {
+    banner.innerHTML = `<span class="wc-icon">🏆</span>
+      FIFA World Cup 2026
+      <span class="wc-dday">D-${diff}</span>
+      <span style="font-size:11px; opacity:0.85;">Jun 11 ~ Jul 19</span>`;
+  } else if (diff === 0) {
+    banner.innerHTML = `<span class="wc-icon">🏆</span>
+      FIFA World Cup 2026
+      <span class="wc-dday" style="background:rgba(233,69,96,0.6);">D-DAY! 🎉</span>
+      <span style="font-size:11px;">IT'S HERE!</span>`;
+  } else {
+    // During or after the tournament (Jul 19, 2026 is final)
+    const wcEnd = new Date(2026, 6, 19);
+    if (now <= wcEnd) {
+      const matchDay = Math.abs(diff) + 1;
+      banner.innerHTML = `<span class="wc-icon">🏆</span>
+        FIFA World Cup 2026 <span style="font-size:11px; opacity:0.85;">LIVE! Day ${matchDay}</span>`;
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+}
+
+// ===== MANUAL REFRESH =====
+function manualRefresh() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  refreshCount = 60;
+  calMatchCache = {}; // clear calendar cache too
+  loadAll().then(() => {
+    setTimeout(() => btn.classList.remove('spinning'), 500);
+  });
+}
+
 function init() {
+  updateWCBanner();
   renderTabs();
   updateDateDisplay();
   loadAll();
@@ -394,10 +635,13 @@ function goToday() {
 }
 
 // ===== CALENDAR =====
+let calMatchCache = {};  // key: 'YYYY-MM' -> { 'YYYYMMDD': [{home,away,hScore,aScore,state,league},...] }
+
 function openCalendar() {
   calViewDate = new Date(currentDate);
   renderCalendar();
   document.getElementById('calendarOverlay').classList.add('show');
+  fetchCalendarMatches();
 }
 function closeCalendar(e) {
   if (e && e.target !== document.getElementById('calendarOverlay')) return;
@@ -406,7 +650,72 @@ function closeCalendar(e) {
 function calChangeMonth(delta) {
   calViewDate.setMonth(calViewDate.getMonth() + delta);
   renderCalendar();
+  fetchCalendarMatches();
 }
+
+async function fetchCalendarMatches() {
+  const y = calViewDate.getFullYear(), m = calViewDate.getMonth();
+  const cacheKey = `${y}-${String(m+1).padStart(2,'0')}`;
+  if (calMatchCache[cacheKey]) { renderCalendarMatches(calMatchCache[cacheKey]); return; }
+
+  // Show loading indicator
+  const loadingEl = document.getElementById('calLoading');
+  if (loadingEl) loadingEl.style.display = 'block';
+
+  const matchesByDate = {};
+  const dim = new Date(y, m+1, 0).getDate();
+
+  // Fetch data for each league for the whole month (batch by date range)
+  // ESPN API takes single date, so we fetch for each day in parallel with throttling
+  // Optimization: fetch every 3 days and use those results
+  const datesToFetch = [];
+  for (let d = 1; d <= dim; d++) {
+    datesToFetch.push(getDateStr(new Date(y, m, d)));
+  }
+
+  // Fetch all leagues for all days (limit concurrency)
+  const leaguesToFetch = ALL_SINGLE;
+  const batchSize = 5;
+  for (let i = 0; i < datesToFetch.length; i += batchSize) {
+    const batch = datesToFetch.slice(i, i + batchSize);
+    const promises = [];
+    for (const dateStr of batch) {
+      for (const lg of leaguesToFetch) {
+        promises.push(
+          fetchESPN(lg.espn, dateStr).then(data => {
+            if (!data?.events?.length) return;
+            if (!matchesByDate[dateStr]) matchesByDate[dateStr] = [];
+            for (const ev of data.events) {
+              const comp = ev.competitions?.[0];
+              if (!comp) continue;
+              const home = comp.competitors?.find(c => c.homeAway === 'home');
+              const away = comp.competitors?.find(c => c.homeAway === 'away');
+              if (!home || !away) continue;
+              const state = comp.status?.type?.state || 'pre';
+              matchesByDate[dateStr].push({
+                home: home.team?.abbreviation || home.team?.shortDisplayName || '?',
+                away: away.team?.abbreviation || away.team?.shortDisplayName || '?',
+                hScore: home.score || '0',
+                aScore: away.score || '0',
+                state: state,
+                league: lg.name,
+                leagueId: lg.id,
+              });
+            }
+          })
+        );
+      }
+    }
+    await Promise.all(promises);
+    // Progressive render after each batch
+    renderCalendarMatches(matchesByDate);
+  }
+
+  calMatchCache[cacheKey] = matchesByDate;
+  if (loadingEl) loadingEl.style.display = 'none';
+  renderCalendarMatches(matchesByDate);
+}
+
 function renderCalendar() {
   const months = ['January','February','March','April','May','June',
                   'July','August','September','October','November','December'];
@@ -417,18 +726,79 @@ function renderCalendar() {
   const prevDim = new Date(y, m, 0).getDate();
   const today = new Date();
   let html = '';
-  for (let i = firstDay-1; i >= 0; i--)
-    html += `<button class="cal-day other-month" onclick="selectCalDate(${y},${m-1},${prevDim-i})">${prevDim-i}</button>`;
+
+  // Previous month fill
+  for (let i = firstDay-1; i >= 0; i--) {
+    const pd = prevDim - i;
+    const pm = m - 1;
+    const ds = getDateStr(new Date(y, pm, pd));
+    html += `<div class="cal-cell other-month" onclick="selectCalDate(${y},${pm},${pd})">
+      <span class="cal-date">${pd}</span>
+      <div class="cal-matches" data-date="${ds}"></div>
+    </div>`;
+  }
+
+  // Current month days
   for (let d = 1; d <= dim; d++) {
     const isT = d===today.getDate() && m===today.getMonth() && y===today.getFullYear();
     const isS = d===currentDate.getDate() && m===currentDate.getMonth() && y===currentDate.getFullYear();
-    html += `<button class="cal-day${isT?' today':''}${isS?' selected':''}" onclick="selectCalDate(${y},${m},${d})">${d}</button>`;
+    const ds = getDateStr(new Date(y, m, d));
+    html += `<div class="cal-cell${isT?' today':''}${isS?' selected':''}" onclick="selectCalDate(${y},${m},${d})">
+      <span class="cal-date">${d}</span>
+      <div class="cal-matches" data-date="${ds}"></div>
+    </div>`;
   }
+
+  // Next month fill
   const rem = (7 - ((firstDay + dim) % 7)) % 7;
-  for (let d = 1; d <= rem; d++)
-    html += `<button class="cal-day other-month" onclick="selectCalDate(${y},${m+1},${d})">${d}</button>`;
+  for (let d = 1; d <= rem; d++) {
+    const nm = m + 1;
+    const ds = getDateStr(new Date(y, nm, d));
+    html += `<div class="cal-cell other-month" onclick="selectCalDate(${y},${nm},${d})">
+      <span class="cal-date">${d}</span>
+      <div class="cal-matches" data-date="${ds}"></div>
+    </div>`;
+  }
   document.getElementById('calDays').innerHTML = html;
 }
+
+function renderCalendarMatches(matchesByDate) {
+  const cells = document.querySelectorAll('.cal-matches[data-date]');
+  cells.forEach(cell => {
+    const dateStr = cell.getAttribute('data-date');
+    const matches = matchesByDate[dateStr];
+    if (!matches || matches.length === 0) { cell.innerHTML = ''; return; }
+
+    const maxShow = 4;
+    let html = '';
+    const shown = matches.slice(0, maxShow);
+    for (const m of shown) {
+      let cls = 'cal-scheduled';
+      let scoreText = '';
+      if (m.state === 'post') { cls = 'cal-final'; scoreText = ` ${m.hScore}-${m.aScore}`; }
+      else if (m.state === 'in') { cls = 'cal-live'; scoreText = ` ${m.hScore}-${m.aScore}`; }
+      html += `<div class="cal-match ${cls}" data-league="${m.leagueId}" onclick="selectCalMatch(event,'${dateStr}','${m.leagueId}')">${m.home} v ${m.away}${scoreText}</div>`;
+    }
+    if (matches.length > maxShow) {
+      html += `<div class="cal-more">+${matches.length - maxShow} more</div>`;
+    }
+    cell.innerHTML = html;
+  });
+}
+
+function selectCalMatch(e, dateStr, leagueId) {
+  e.stopPropagation(); // prevent cal-cell click from firing
+  const y = parseInt(dateStr.substring(0,4));
+  const m = parseInt(dateStr.substring(4,6)) - 1;
+  const d = parseInt(dateStr.substring(6,8));
+  currentDate = new Date(y, m, d);
+  currentLeague = leagueId;
+  updateDateDisplay();
+  renderTabs();
+  loadAll();
+  document.getElementById('calendarOverlay').classList.remove('show');
+}
+
 function selectCalDate(y, m, d) {
   currentDate = new Date(y, m, d);
   updateDateDisplay();
@@ -579,7 +949,13 @@ async function loadMatches() {
         detailsHtml += '</div>';
       }
 
-      html += `<div class="match-card ${isLive ? 'live' : ''}">
+      const canDetail = !isPre; // can open detail modal for live + finished matches
+      const clickClass = canDetail ? 'clickable' : '';
+      const eventId = event.id || '';
+      const clickHandler = canDetail ? `onclick="openMatchDetail('${league.espn}','${eventId}',event)"` : '';
+      const hintHtml = canDetail ? '<div class="match-expand-hint">tap for full details</div>' : '';
+
+      html += `<div class="match-card ${isLive ? 'live' : ''} ${clickClass}" ${clickHandler}>
         <div class="match-main">
           <div class="match-time ${isLive ? 'live-time' : ''}">${timeHtml}</div>
           <div class="match-teams">
@@ -596,6 +972,7 @@ async function loadMatches() {
           </div>
           <div class="match-status ${stClass}">${stText}</div>
         </div>
+        ${hintHtml}
         ${detailsHtml}
       </div>`;
     }
@@ -667,6 +1044,252 @@ async function loadStandings() {
   }
   html += '</tbody></table>';
   panel.innerHTML = html;
+}
+
+// ===== MATCH DETAIL MODAL =====
+async function fetchMatchSummary(league, eventId) {
+  try {
+    const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/summary?event=${eventId}`);
+    return r.ok ? await r.json() : null;
+  } catch(e) { return null; }
+}
+
+function openMatchDetail(league, eventId, e) {
+  if (e) e.stopPropagation();
+  const overlay = document.getElementById('detailOverlay');
+  const content = document.getElementById('detailContent');
+  content.innerHTML = '<div class="detail-loading"><div class="spinner"></div>Loading match details...</div>';
+  overlay.classList.add('show');
+  fetchMatchSummary(league, eventId).then(data => renderMatchDetail(data, league));
+}
+
+function closeDetail(e) {
+  if (e && e.target !== document.getElementById('detailOverlay')) return;
+  document.getElementById('detailOverlay').classList.remove('show');
+}
+
+function renderMatchDetail(data, league) {
+  const content = document.getElementById('detailContent');
+  if (!data) {
+    content.innerHTML = '<div class="detail-loading">Could not load match details.</div>';
+    return;
+  }
+
+  const header = data.header;
+  const comp = header?.competitions?.[0];
+  if (!comp) { content.innerHTML = '<div class="detail-loading">No data available.</div>'; return; }
+
+  const competitors = comp.competitors || [];
+  const home = competitors.find(c => c.homeAway === 'home') || competitors[0];
+  const away = competitors.find(c => c.homeAway === 'away') || competitors[1];
+  const status = comp.status;
+  const leagueName = header?.league?.name || league;
+
+  // Score header
+  const statusText = status?.type?.shortDetail || 'FT';
+  let scoreHtml = `
+    <div class="detail-score-header">
+      <button class="detail-modal-close" onclick="document.getElementById('detailOverlay').classList.remove('show')">✕</button>
+      <div class="detail-league-name">${leagueName}</div>
+      <div class="detail-teams-row">
+        <div class="detail-team-col">
+          <img src="${home?.team?.logos?.[0]?.href||''}" alt="" onerror="this.style.display='none'">
+          <div class="t-name">${home?.team?.displayName||'?'}</div>
+        </div>
+        <div class="detail-score-box">
+          ${home?.score||0}<span class="score-sep">-</span>${away?.score||0}
+        </div>
+        <div class="detail-team-col">
+          <img src="${away?.team?.logos?.[0]?.href||''}" alt="" onerror="this.style.display='none'">
+          <div class="t-name">${away?.team?.displayName||'?'}</div>
+        </div>
+      </div>
+      <div class="detail-match-info">${statusText}</div>
+    </div>`;
+
+  // Tabs
+  let tabsHtml = `<div class="detail-tabs">
+    <div class="detail-tab active" onclick="switchDetailTab(this,'stats')">Stats</div>
+    <div class="detail-tab" onclick="switchDetailTab(this,'events')">Events</div>
+    <div class="detail-tab" onclick="switchDetailTab(this,'lineups')">Lineups</div>
+  </div>`;
+
+  // ===== STATS TAB =====
+  let statsHtml = '<div class="detail-tab-content active" id="dtab-stats">';
+  const boxscore = data.boxscore;
+  if (boxscore?.teams?.length >= 2) {
+    const homeStats = {};
+    const awayStats = {};
+    (boxscore.teams[0]?.statistics || []).forEach(s => { homeStats[s.name] = s.displayValue; });
+    (boxscore.teams[1]?.statistics || []).forEach(s => { awayStats[s.name] = s.displayValue; });
+
+    // If teams are swapped (check which is home)
+    const bHome = boxscore.teams.find(t => t.homeAway === 'home') || boxscore.teams[0];
+    const bAway = boxscore.teams.find(t => t.homeAway === 'away') || boxscore.teams[1];
+    const hS = {}, aS = {};
+    (bHome.statistics || []).forEach(s => { hS[s.name] = s.displayValue; });
+    (bAway.statistics || []).forEach(s => { aS[s.name] = s.displayValue; });
+
+    const statsList = [
+      ['possessionPct', 'Possession %'],
+      ['totalShots', 'Total Shots'],
+      ['shotsOnTarget', 'Shots on Target'],
+      ['cornerKicks', 'Corners'],
+      ['foulsCommitted', 'Fouls'],
+      ['offsides', 'Offsides'],
+      ['wonCorners', 'Corners Won'],
+      ['saves', 'Saves'],
+      ['yellowCards', 'Yellow Cards'],
+      ['redCards', 'Red Cards'],
+    ];
+
+    for (const [key, label] of statsList) {
+      const hv = hS[key], av = aS[key];
+      if (hv === undefined && av === undefined) continue;
+      const hn = parseFloat(hv)||0, an = parseFloat(av)||0;
+      const total = hn + an || 1;
+      const hp = (hn/total*100).toFixed(0), ap = (an/total*100).toFixed(0);
+      statsHtml += `<div class="stat-row">
+        <span class="stat-val">${hv||0}</span>
+        <div class="stat-bar-wrap left"><div class="stat-bar home" style="width:${hp}%"></div></div>
+        <span class="stat-label">${label}</span>
+        <div class="stat-bar-wrap"><div class="stat-bar away" style="width:${ap}%"></div></div>
+        <span class="stat-val">${av||0}</span>
+      </div>`;
+    }
+  } else {
+    statsHtml += '<div style="text-align:center;color:#999;padding:20px;">Stats not available</div>';
+  }
+  statsHtml += '</div>';
+
+  // ===== EVENTS TAB =====
+  let eventsHtml = '<div class="detail-tab-content" id="dtab-events">';
+  const keyEvents = data.keyEvents || [];
+  const allDetails = comp.details || data.header?.competitions?.[0]?.details || [];
+
+  // Try keyEvents first, fallback to details
+  if (keyEvents.length > 0) {
+    for (const ev of keyEvents) {
+      const play = ev.play || ev;
+      const typeName = play.type?.text || ev.text || '';
+      const minute = play.clock?.displayValue || ev.clock?.displayValue || '';
+      const participants = play.participants || [];
+      const playerName = participants[0]?.athlete?.displayName || '';
+      const teamId = play.team?.id || '';
+
+      let icon = '📋', eventText = typeName;
+      if (typeName.includes('Goal') || typeName.includes('Penalty - Scored')) {
+        icon = '⚽'; eventText = playerName ? `${playerName} scores!` : 'Goal!';
+      } else if (typeName.includes('Own Goal')) {
+        icon = '⚽'; eventText = playerName ? `${playerName} (OG)` : 'Own Goal';
+      } else if (typeName.includes('Yellow')) {
+        icon = '🟨'; eventText = playerName || 'Yellow Card';
+      } else if (typeName.includes('Red') || typeName.includes('Second Yellow')) {
+        icon = '🟥'; eventText = playerName || 'Red Card';
+      } else if (typeName.includes('Substitution')) {
+        icon = '🔄'; eventText = playerName ? `${playerName}` : 'Substitution';
+      } else if (typeName.includes('Penalty - Missed') || typeName.includes('Penalty - Saved')) {
+        icon = '❌'; eventText = playerName ? `${playerName} penalty missed` : 'Penalty missed';
+      }
+
+      const isHome = teamId === (home?.team?.id || '');
+      const teamTag = teamId ? `<span class="event-team-tag ${isHome?'home':'away'}">${isHome ? (home?.team?.abbreviation||'HOME') : (away?.team?.abbreviation||'AWAY')}</span>` : '';
+
+      eventsHtml += `<div class="event-row">
+        <span class="event-min">${minute}'</span>
+        <span class="event-icon">${icon}</span>
+        <span class="event-text">${eventText}</span>
+        ${teamTag}
+      </div>`;
+    }
+  } else if (allDetails.length > 0) {
+    // Fallback to comp.details
+    for (const det of allDetails) {
+      const typeName = det.type?.text || '';
+      const player = det.athletesInvolved?.[0]?.displayName || '';
+      const minute = det.clock?.displayValue || '';
+      let icon = '📋';
+      if (typeName.includes('Goal')) icon = '⚽';
+      else if (typeName.includes('Yellow')) icon = '🟨';
+      else if (typeName.includes('Red')) icon = '🟥';
+      else if (typeName.includes('Substitution')) icon = '🔄';
+
+      const teamObj = det.team;
+      const isHome = teamObj?.id === (home?.team?.id || '');
+      const teamTag = teamObj ? `<span class="event-team-tag ${isHome?'home':'away'}">${teamObj.abbreviation||''}</span>` : '';
+
+      eventsHtml += `<div class="event-row">
+        <span class="event-min">${minute}'</span>
+        <span class="event-icon">${icon}</span>
+        <span class="event-text">${player || typeName}</span>
+        ${teamTag}
+      </div>`;
+    }
+  } else {
+    eventsHtml += '<div style="text-align:center;color:#999;padding:20px;">No events data</div>';
+  }
+  eventsHtml += '</div>';
+
+  // ===== LINEUPS TAB =====
+  let lineupsHtml = '<div class="detail-tab-content" id="dtab-lineups">';
+  const rosters = data.rosters || [];
+  if (rosters.length >= 2) {
+    for (const roster of rosters) {
+      const team = roster.team;
+      const isH = team?.id === (home?.team?.id || '');
+      const formation = roster.formation || '';
+      lineupsHtml += `<div class="lineup-section">
+        <div class="lineup-title">
+          <img src="${team?.logos?.[0]?.href||''}" alt="" onerror="this.style.display='none'">
+          ${team?.displayName||'?'}
+          ${formation ? `<span class="lineup-formation">(${formation})</span>` : ''}
+        </div>`;
+
+      const starters = (roster.roster || []).filter(p => p.starter);
+      const subs = (roster.roster || []).filter(p => !p.starter);
+
+      for (const p of starters) {
+        const num = p.jersey || '';
+        const name = p.athlete?.displayName || p.displayName || '?';
+        const pos = p.position?.abbreviation || '';
+        lineupsHtml += `<div class="lineup-player">
+          <span class="lineup-number">${num}</span>
+          <span>${name}</span>
+          <span style="color:#999;font-size:10px;margin-left:auto;">${pos}</span>
+        </div>`;
+      }
+
+      if (subs.length > 0) {
+        lineupsHtml += '<div class="lineup-sub-label">Substitutes</div>';
+        for (const p of subs) {
+          const num = p.jersey || '';
+          const name = p.athlete?.displayName || p.displayName || '?';
+          const pos = p.position?.abbreviation || '';
+          lineupsHtml += `<div class="lineup-player" style="opacity:0.7;">
+            <span class="lineup-number" style="background:#f5f5f5;color:#888;">${num}</span>
+            <span>${name}</span>
+            <span style="color:#bbb;font-size:10px;margin-left:auto;">${pos}</span>
+          </div>`;
+        }
+      }
+      lineupsHtml += '</div>';
+    }
+  } else {
+    lineupsHtml += '<div style="text-align:center;color:#999;padding:20px;">Lineups not available</div>';
+  }
+  lineupsHtml += '</div>';
+
+  content.innerHTML = scoreHtml + tabsHtml + statsHtml + eventsHtml + lineupsHtml;
+}
+
+function switchDetailTab(el, tabId) {
+  // Deactivate all tabs
+  el.parentElement.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  // Show correct content
+  document.querySelectorAll('.detail-tab-content').forEach(c => c.classList.remove('active'));
+  const target = document.getElementById('dtab-' + tabId);
+  if (target) target.classList.add('active');
 }
 
 // ===== AUTO REFRESH =====
