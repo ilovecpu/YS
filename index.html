@@ -444,7 +444,7 @@
     /* Screen Time Alert */
     .screen-alert-overlay {
       display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7); z-index: 500;
+      background: rgba(0,0,0,0.85); z-index: 500;
       justify-content: center; align-items: center;
     }
     .screen-alert-overlay.show { display: flex; }
@@ -471,6 +471,48 @@
       font-weight: 700; cursor: pointer; transition: background 0.2s;
     }
     .screen-alert-btn:hover { background: #1d4ed8; }
+    /* Lock screen */
+    .screen-lock-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.95); z-index: 600;
+      justify-content: center; align-items: center;
+      flex-direction: column;
+    }
+    .screen-lock-overlay.show { display: flex; }
+    .screen-lock-box {
+      background: #1a1a2e; border-radius: 20px; padding: 36px 28px; text-align: center;
+      width: 340px; max-width: 90vw;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.5);
+    }
+    .screen-lock-icon { font-size: 60px; margin-bottom: 16px; }
+    .screen-lock-msg {
+      font-size: 20px; font-weight: 700; color: #ff6b6b;
+      line-height: 1.6; margin-bottom: 8px;
+    }
+    .screen-lock-sub { font-size: 13px; color: #aaa; margin-bottom: 24px; }
+    .screen-lock-input {
+      width: 180px; padding: 12px 16px; border: 2px solid #444;
+      border-radius: 12px; font-size: 20px; text-align: center;
+      background: #2a2a3e; color: #fff; letter-spacing: 8px;
+      outline: none; -webkit-text-security: disc;
+    }
+    .screen-lock-input:focus { border-color: #2563eb; }
+    .screen-lock-submit {
+      display: block; margin: 16px auto 0; background: #2563eb; color: #fff;
+      border: none; padding: 12px 40px; border-radius: 30px;
+      font-size: 16px; font-weight: 700; cursor: pointer;
+    }
+    .screen-lock-error {
+      color: #ff4444; font-size: 13px; margin-top: 10px;
+      min-height: 18px;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-12px); }
+      40% { transform: translateX(12px); }
+      60% { transform: translateX(-8px); }
+      80% { transform: translateX(8px); }
+    }
 
     /* Footer */
     .footer { text-align: center; padding: 16px; color: #bbb; font-size: 11px; }
@@ -555,7 +597,22 @@
       <div class="screen-alert-icon">⏰</div>
       <div class="screen-alert-msg" id="screenAlertMsg">연성아 너무 오래 보고 있다..<br>여기까지만 봐</div>
       <div class="screen-alert-sub" id="screenAlertSub"></div>
+      <div class="screen-alert-warn" id="screenAlertWarn" style="font-size:12px;color:#e74c3c;margin-bottom:12px;"></div>
       <button class="screen-alert-btn" onclick="dismissScreenAlert()">OK</button>
+    </div>
+  </div>
+
+  <!-- Screen Lock (after 3 warnings) -->
+  <div class="screen-lock-overlay" id="screenLockOverlay">
+    <div class="screen-lock-box">
+      <div class="screen-lock-icon">🔒</div>
+      <div class="screen-lock-msg">사용 시간 초과!<br>잠금되었습니다</div>
+      <div class="screen-lock-sub" id="screenLockSub"></div>
+      <input type="password" class="screen-lock-input" id="screenLockInput"
+             placeholder="••••" maxlength="10" inputmode="numeric"
+             onkeydown="if(event.key==='Enter')unlockScreen()">
+      <button class="screen-lock-submit" onclick="unlockScreen()">잠금 해제</button>
+      <div class="screen-lock-error" id="screenLockError"></div>
     </div>
   </div>
 
@@ -1375,18 +1432,23 @@ window.addEventListener('popstate', () => history.pushState(null,'',window.locat
 history.pushState(null,'',window.location.href);
 
 // ===== SCREEN TIME GUARDIAN =====
-// 20분 연속 사용 시 첫 경고, OK 누른 후 1분마다 반복
+// 10분 연속 사용 시 첫 경고, OK 누른 후 1분마다 반복
+// 3번째 경고 후 OK → 완전 잠금 (패스워드 필요)
 // 1시간 이상 비활성(탭 숨김/화면꺼짐) 시 타이머 리셋
-const SCREEN_FIRST_ALERT = 20 * 60 * 1000;   // 20분
+const SCREEN_FIRST_ALERT = 10 * 60 * 1000;   // 10분
 const SCREEN_REPEAT_ALERT = 1 * 60 * 1000;    // 1분
 const SCREEN_IDLE_RESET = 60 * 60 * 1000;     // 1시간
+const SCREEN_MAX_WARNS = 3;                    // 3번 경고 후 잠금
+const SCREEN_LOCK_PIN = '7479';                // 잠금 해제 패스워드
 
 let screenStartTime = Date.now();
 let screenAlertTimer = null;
 let screenAlertCount = 0;
 let screenHiddenTime = null;
+let screenLocked = false;
 
 function startScreenTimer() {
+  if (screenLocked) return;
   clearTimeout(screenAlertTimer);
   screenStartTime = Date.now();
   screenAlertCount = 0;
@@ -1394,6 +1456,7 @@ function startScreenTimer() {
 }
 
 function scheduleScreenAlert(delay) {
+  if (screenLocked) return;
   clearTimeout(screenAlertTimer);
   screenAlertTimer = setTimeout(() => {
     showScreenAlert();
@@ -1406,13 +1469,20 @@ function showScreenAlert() {
   const overlay = document.getElementById('screenAlertOverlay');
   const msg = document.getElementById('screenAlertMsg');
   const sub = document.getElementById('screenAlertSub');
+  const warn = document.getElementById('screenAlertWarn');
+
+  const remaining = SCREEN_MAX_WARNS - screenAlertCount;
 
   if (screenAlertCount === 1) {
     msg.innerHTML = '연성아 너무 오래 보고 있다..<br>여기까지만 봐';
-  } else if (screenAlertCount <= 3) {
-    msg.innerHTML = '연성아~ 아직도 보고 있네?<br>이제 그만 봐!';
+    warn.textContent = `⚠️ 경고 ${screenAlertCount}/${SCREEN_MAX_WARNS} — ${remaining}번 더 무시하면 잠금됩니다`;
+  } else if (screenAlertCount === 2) {
+    msg.innerHTML = '연성아~ 아직도 보고 있네?<br>이제 진짜 그만 봐!';
+    warn.textContent = `⚠️ 경고 ${screenAlertCount}/${SCREEN_MAX_WARNS} — ${remaining}번 더 무시하면 잠금됩니다`;
   } else {
-    msg.innerHTML = '연성아!! 진짜 그만 봐!! 😤<br>눈 나빠진다!';
+    msg.innerHTML = '연성아!! 마지막 경고야!! 😤<br>OK 누르면 잠금된다!';
+    warn.textContent = '🔒 마지막 기회! OK 누르면 잠금됩니다';
+    warn.style.fontWeight = '700';
   }
   sub.textContent = `${totalMin}분째 보고 있어요`;
   overlay.classList.add('show');
@@ -1420,25 +1490,61 @@ function showScreenAlert() {
 
 function dismissScreenAlert() {
   document.getElementById('screenAlertOverlay').classList.remove('show');
-  // OK 누른 후 1분 뒤 다시 알림
-  scheduleScreenAlert(SCREEN_REPEAT_ALERT);
+
+  if (screenAlertCount >= SCREEN_MAX_WARNS) {
+    // 3번 경고 모두 소진 → 잠금!
+    activateLock();
+  } else {
+    // 아직 기회 남음 → 1분 후 다시 경고
+    scheduleScreenAlert(SCREEN_REPEAT_ALERT);
+  }
 }
 
-// 탭 숨김/표시 감지 (화면 꺼짐, 다른 앱 전환 등)
+function activateLock() {
+  screenLocked = true;
+  clearTimeout(screenAlertTimer);
+  const totalMin = Math.round((Date.now() - screenStartTime) / 60000);
+  document.getElementById('screenLockSub').textContent = `총 ${totalMin}분 사용 · 아빠한테 말해서 풀어달라고 해`;
+  document.getElementById('screenLockInput').value = '';
+  document.getElementById('screenLockError').textContent = '';
+  document.getElementById('screenLockOverlay').classList.add('show');
+}
+
+function unlockScreen() {
+  const input = document.getElementById('screenLockInput');
+  const error = document.getElementById('screenLockError');
+  if (input.value === SCREEN_LOCK_PIN) {
+    // 해제 성공
+    screenLocked = false;
+    document.getElementById('screenLockOverlay').classList.remove('show');
+    input.value = '';
+    error.textContent = '';
+    // 타이머 완전 리셋
+    startScreenTimer();
+  } else {
+    error.textContent = '비밀번호가 틀렸어요!';
+    input.value = '';
+    input.focus();
+    // 틀리면 잠깐 흔들기
+    const box = input.closest('.screen-lock-box');
+    box.style.animation = 'none';
+    box.offsetHeight;
+    box.style.animation = 'shake 0.4s ease-out';
+  }
+}
+
+// 탭 숨김/표시 감지
 document.addEventListener('visibilitychange', () => {
+  if (screenLocked) return;
   if (document.hidden) {
-    // 화면 안 보기 시작
     screenHiddenTime = Date.now();
     clearTimeout(screenAlertTimer);
   } else {
-    // 다시 돌아옴
     if (screenHiddenTime) {
       const away = Date.now() - screenHiddenTime;
       if (away >= SCREEN_IDLE_RESET) {
-        // 1시간 이상 안 봤으면 완전 리셋
         startScreenTimer();
       } else {
-        // 잠깐 나갔다 왔으면 남은 시간 계속
         const elapsed = Date.now() - screenStartTime;
         if (screenAlertCount === 0 && elapsed < SCREEN_FIRST_ALERT) {
           scheduleScreenAlert(SCREEN_FIRST_ALERT - elapsed);

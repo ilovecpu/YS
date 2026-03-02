@@ -1,7 +1,8 @@
-const CACHE_NAME = 'ys-football-v1';
+const CACHE_NAME = 'ys-football-v3';
 
 // Install event - cache basic shell
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll([
@@ -12,10 +13,9 @@ self.addEventListener('install', (event) => {
       ]);
     })
   );
-  self.skipWaiting();
 });
 
-// Activate event - clean old caches
+// Activate event - delete ALL old caches immediately
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -23,17 +23,24 @@ self.addEventListener('activate', (event) => {
         keys.filter((key) => key !== CACHE_NAME)
             .map((key) => caches.delete(key))
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Fetch event - network first (always get fresh ESPN data), fallback to cache
+// Fetch event - network first, fallback to cache
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+
+  // For API calls (ESPN) - network only, no cache
+  if (url.hostname.includes('espn')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // For app files - network first, cache fallback
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Cache successful responses for offline fallback
         if (response.ok) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -43,7 +50,6 @@ self.addEventListener('fetch', (event) => {
         return response;
       })
       .catch(() => {
-        // Offline - serve from cache
         return caches.match(event.request);
       })
   );
