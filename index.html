@@ -15,7 +15,6 @@
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     html, body {
       overscroll-behavior: none;
       touch-action: pan-y;
@@ -34,8 +33,8 @@
 
     /* Header */
     .header {
-      background: #ffffff;
-      padding: 12px 16px;
+      background: #fff;
+      padding: 10px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -45,417 +44,232 @@
       z-index: 100;
       box-shadow: 0 1px 4px rgba(0,0,0,0.06);
     }
-    .header h1 {
-      font-size: 18px;
-      color: #e94560;
-      font-weight: 700;
-    }
+    .header h1 { font-size: 17px; color: #e94560; font-weight: 700; }
     .header h1 span { color: #2563eb; }
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 12px;
-      color: #888;
-    }
+    .header-right { display: flex; align-items: center; gap: 10px; font-size: 12px; color: #888; }
     .refresh-timer {
-      background: #eef2ff;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 11px;
-      color: #2563eb;
-      font-weight: 600;
+      background: #eef2ff; padding: 4px 10px; border-radius: 12px;
+      font-size: 11px; color: #2563eb; font-weight: 600;
     }
 
     /* League Tabs */
     .league-tabs {
-      display: flex;
-      overflow-x: auto;
-      background: #ffffff;
-      padding: 8px 8px 0;
-      gap: 4px;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      display: flex; overflow-x: auto; background: #fff;
+      padding: 6px 8px 0; gap: 3px;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
     }
     .league-tabs::-webkit-scrollbar { display: none; }
     .league-tab {
-      padding: 8px 16px;
-      border-radius: 8px 8px 0 0;
-      background: #f0f2f5;
-      color: #666;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      border: 1px solid #e0e0e0;
-      border-bottom: none;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      padding: 7px 12px; border-radius: 8px 8px 0 0;
+      background: #f0f2f5; color: #666; font-size: 12px; font-weight: 600;
+      cursor: pointer; white-space: nowrap;
+      border: 1px solid #e0e0e0; border-bottom: none;
+      transition: all 0.2s; display: flex; align-items: center; gap: 5px;
     }
-    .league-tab img {
-      width: 18px;
-      height: 18px;
-      object-fit: contain;
-    }
-    .league-tab.active {
-      background: #f0f2f5;
-      color: #2563eb;
-      border-color: #2563eb;
-      border-bottom: 2px solid #f0f2f5;
-    }
+    .league-tab img { width: 16px; height: 16px; object-fit: contain; }
+    .league-tab.active { background: #f0f2f5; color: #2563eb; border-color: #2563eb; }
     .league-tab:hover:not(.active) { color: #333; background: #e8eaed; }
 
     /* Date Navigator */
     .date-nav {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      padding: 12px;
-      background: #ffffff;
-      border-bottom: 1px solid #e0e0e0;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 10px; background: #fff; border-bottom: 1px solid #e0e0e0;
     }
     .date-btn {
-      background: #eef2ff;
-      color: #2563eb;
-      border: none;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      font-size: 18px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
+      background: #eef2ff; color: #2563eb; border: none;
+      width: 34px; height: 34px; border-radius: 50%; font-size: 16px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
     .date-btn:hover { background: #dbeafe; }
     .date-display {
-      font-size: 15px;
-      font-weight: 600;
-      color: #1a1a1a;
-      min-width: 180px;
-      text-align: center;
-      cursor: pointer;
-      padding: 6px 12px;
-      border-radius: 8px;
-      transition: background 0.2s;
+      font-size: 14px; font-weight: 600; color: #1a1a1a;
+      min-width: 170px; text-align: center; cursor: pointer;
+      padding: 5px 10px; border-radius: 8px;
     }
     .date-display:hover { background: #eef2ff; }
     .today-btn {
-      background: #e94560;
-      color: white;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 16px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
+      background: #e94560; color: white; border: none;
+      padding: 5px 12px; border-radius: 14px; font-size: 11px; font-weight: 600; cursor: pointer;
     }
-    .today-btn:hover { background: #d63050; }
 
     /* Calendar Overlay */
     .calendar-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.3);
-      z-index: 200;
-      justify-content: center;
-      align-items: center;
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.3); z-index: 200;
+      justify-content: center; align-items: center;
     }
     .calendar-overlay.show { display: flex; }
-
     .calendar {
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-      width: 320px;
-      max-width: 90vw;
+      background: #fff; border-radius: 16px; padding: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15); width: 320px; max-width: 90vw;
     }
-    .cal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-    }
-    .cal-header .cal-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: #1a1a1a;
-    }
+    .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .cal-header .cal-title { font-size: 17px; font-weight: 700; color: #1a1a1a; }
     .cal-nav {
-      background: #eef2ff;
-      color: #2563eb;
-      border: none;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      font-size: 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: #eef2ff; color: #2563eb; border: none;
+      width: 32px; height: 32px; border-radius: 50%; font-size: 16px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
     }
-    .cal-nav:hover { background: #dbeafe; }
     .cal-weekdays {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      text-align: center;
-      font-size: 12px;
-      color: #999;
-      font-weight: 600;
-      margin-bottom: 8px;
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      text-align: center; font-size: 12px; color: #999; font-weight: 600; margin-bottom: 8px;
     }
-    .cal-days {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-    }
+    .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
     .cal-day {
-      width: 100%;
-      aspect-ratio: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      font-size: 14px;
-      cursor: pointer;
-      border: none;
-      background: transparent;
-      color: #333;
-      font-weight: 500;
-      transition: all 0.15s;
+      width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; font-size: 14px; cursor: pointer; border: none;
+      background: transparent; color: #333; font-weight: 500;
     }
     .cal-day:hover { background: #eef2ff; }
-    .cal-day.today {
-      border: 2px solid #2563eb;
-      font-weight: 700;
-    }
-    .cal-day.selected {
-      background: #2563eb;
-      color: white;
-      font-weight: 700;
-    }
+    .cal-day.today { border: 2px solid #2563eb; font-weight: 700; }
+    .cal-day.selected { background: #2563eb; color: white; font-weight: 700; }
     .cal-day.other-month { color: #ccc; }
-    .cal-day.empty { cursor: default; }
 
-    /* View Toggle */
-    .view-toggle {
-      display: flex;
-      justify-content: center;
-      gap: 4px;
-      padding: 10px;
-      background: #f0f2f5;
-    }
-    .view-btn {
-      padding: 8px 24px;
-      border-radius: 20px;
-      background: #ffffff;
-      color: #666;
-      border: 1px solid #ddd;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .view-btn.active {
-      background: #2563eb;
-      color: white;
-      border-color: #2563eb;
-    }
-
-    /* Content Area */
-    .content {
+    /* Main Layout: Side by Side */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
       padding: 12px;
-      max-width: 900px;
+      max-width: 1200px;
       margin: 0 auto;
+    }
+    .panel {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #2563eb;
+      background: #f8f9fa;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .panel-body {
+      padding: 8px;
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
+    }
+
+    @media (max-width: 768px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+      .panel-body {
+        max-height: none;
+      }
     }
 
     /* Match Card */
     .match-group-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: #2563eb;
-      padding: 12px 0 8px;
-      border-bottom: 1px solid #e0e0e0;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      font-size: 13px; font-weight: 700; color: #2563eb;
+      padding: 10px 6px 6px; border-bottom: 1px solid #e8e8e8;
+      margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
     }
-    .match-group-title img {
-      width: 20px;
-      height: 20px;
-    }
+    .match-group-title img { width: 18px; height: 18px; }
 
     .match-card {
-      background: #ffffff;
-      border-radius: 10px;
-      padding: 12px 16px;
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      border: 1px solid #e8e8e8;
+      background: #fff; border-radius: 8px; padding: 10px 12px;
+      margin-bottom: 5px; border: 1px solid #eee;
       transition: border-color 0.2s;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
-    .match-card:hover { border-color: #c0c0c0; }
+    .match-card:hover { border-color: #ccc; }
     .match-card.live { border-left: 3px solid #e94560; }
-
+    .match-main {
+      display: flex; align-items: center;
+    }
     .match-time {
-      width: 60px;
-      text-align: center;
-      font-size: 12px;
-      color: #888;
-      flex-shrink: 0;
+      width: 55px; text-align: center; font-size: 11px; color: #888; flex-shrink: 0;
     }
-    .match-time.live-time {
-      color: #e94560;
-      font-weight: 700;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
+    .match-time.live-time { color: #e94560; font-weight: 700; animation: pulse 2s infinite; }
+    .match-time .uk-time { font-size: 10px; color: #aaa; display: block; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-    .match-teams {
-      flex: 1;
-      min-width: 0;
-    }
+    .match-teams { flex: 1; min-width: 0; }
     .match-team {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 3px 0;
-      font-size: 14px;
+      display: flex; align-items: center; gap: 6px; padding: 2px 0; font-size: 13px;
     }
-    .match-team img {
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
-    }
+    .match-team img { width: 18px; height: 18px; flex-shrink: 0; }
     .match-team .name {
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: #333;
+      flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #333;
     }
     .match-team .score {
-      font-weight: 700;
-      font-size: 16px;
-      width: 24px;
-      text-align: center;
-      color: #1a1a1a;
+      font-weight: 700; font-size: 15px; width: 22px; text-align: center; color: #1a1a1a;
     }
     .match-team.winner .name { color: #1a1a1a; font-weight: 600; }
     .match-team.loser .name { color: #aaa; }
 
     .match-status {
-      width: 70px;
-      text-align: center;
-      font-size: 11px;
-      color: #888;
-      flex-shrink: 0;
+      width: 55px; text-align: center; font-size: 10px; color: #888; flex-shrink: 0;
     }
     .match-status.ft { color: #2563eb; font-weight: 600; }
     .match-status.live { color: #e94560; font-weight: 700; }
 
-    /* Standings Table */
-    .standings-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-      background: #ffffff;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    /* Match Details (goals, cards) */
+    .match-details {
+      margin-top: 6px; padding-top: 6px; border-top: 1px dashed #eee;
+      font-size: 11px; color: #666;
     }
+    .match-detail-row {
+      display: flex; align-items: center; gap: 4px; padding: 1px 0 1px 55px;
+    }
+    .detail-icon { font-size: 12px; width: 16px; text-align: center; flex-shrink: 0; }
+    .detail-minute { color: #999; font-size: 10px; min-width: 28px; }
+    .detail-player { color: #444; }
+    .detail-yellow { color: #f59e0b; }
+    .detail-red { color: #dc2626; }
+    .detail-goal { color: #2563eb; font-weight: 600; }
+
+    /* Standings Table */
+    .standings-table { width: 100%; border-collapse: collapse; font-size: 12px; }
     .standings-table th {
-      background: #f8f9fa;
-      color: #2563eb;
-      padding: 10px 8px;
-      text-align: center;
-      font-weight: 600;
-      position: sticky;
-      top: 52px;
-      z-index: 10;
+      background: #f8f9fa; color: #2563eb; padding: 8px 6px;
+      text-align: center; font-weight: 600; position: sticky; top: 0; z-index: 5;
     }
     .standings-table th:nth-child(2) { text-align: left; }
     .standings-table td {
-      padding: 8px;
-      text-align: center;
-      border-bottom: 1px solid #f0f0f0;
-      color: #333;
+      padding: 6px; text-align: center; border-bottom: 1px solid #f0f0f0; color: #333;
     }
     .standings-table td:nth-child(2) { text-align: left; }
     .standings-table tr:hover td { background: #f8f9ff; }
-    .standings-table .team-cell {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .standings-table .team-cell img {
-      width: 18px;
-      height: 18px;
-    }
+    .standings-table .team-cell { display: flex; align-items: center; gap: 6px; }
+    .standings-table .team-cell img { width: 16px; height: 16px; }
     .standings-table .pos-1, .standings-table .pos-2,
-    .standings-table .pos-3, .standings-table .pos-4 {
-      border-left: 3px solid #2563eb;
-    }
+    .standings-table .pos-3, .standings-table .pos-4 { border-left: 3px solid #2563eb; }
     .standings-table .pos-rel { border-left: 3px solid #e94560; }
     .standings-table .pts { color: #2563eb; font-weight: 700; }
 
     /* Loading & Empty */
-    .loading {
-      text-align: center;
-      padding: 60px 20px;
-      color: #888;
-    }
+    .loading { text-align: center; padding: 40px 20px; color: #888; }
     .loading .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid #e0e0e0;
-      border-top-color: #2563eb;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 16px;
+      width: 36px; height: 36px; border: 3px solid #e0e0e0;
+      border-top-color: #2563eb; border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 12px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    .no-matches {
-      text-align: center;
-      padding: 60px 20px;
-      color: #999;
-      font-size: 15px;
-    }
-    .no-matches .icon { font-size: 48px; margin-bottom: 12px; }
+    .no-matches { text-align: center; padding: 40px 16px; color: #999; font-size: 14px; }
+    .no-matches .icon { font-size: 40px; margin-bottom: 10px; }
 
     /* Footer */
-    .footer {
-      text-align: center;
-      padding: 20px;
-      color: #bbb;
-      font-size: 11px;
-    }
+    .footer { text-align: center; padding: 16px; color: #bbb; font-size: 11px; }
 
-    /* Responsive */
     @media (max-width: 600px) {
-      .header h1 { font-size: 15px; }
-      .match-card { padding: 10px 12px; }
-      .match-time { width: 50px; }
-      .match-status { width: 50px; }
+      .header h1 { font-size: 14px; }
+      .match-card { padding: 8px 10px; }
+      .match-time { width: 48px; }
+      .match-status { width: 48px; }
+      .match-detail-row { padding-left: 48px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
   <div class="header">
     <h1>⚽ Football Info for <span>Yeon-Sung</span></h1>
     <div class="header-right">
@@ -464,10 +278,8 @@
     </div>
   </div>
 
-  <!-- League Tabs -->
   <div class="league-tabs" id="leagueTabs"></div>
 
-  <!-- Date Navigator -->
   <div class="date-nav">
     <button class="date-btn" onclick="changeDate(-1)">◀</button>
     <span class="date-display" id="dateDisplay" onclick="openCalendar()"></span>
@@ -475,7 +287,7 @@
     <button class="today-btn" onclick="goToday()">Today</button>
   </div>
 
-  <!-- Calendar Overlay -->
+  <!-- Calendar -->
   <div class="calendar-overlay" id="calendarOverlay" onclick="closeCalendar(event)">
     <div class="calendar" onclick="event.stopPropagation()">
       <div class="cal-header">
@@ -484,28 +296,32 @@
         <button class="cal-nav" onclick="calChangeMonth(1)">▶</button>
       </div>
       <div class="cal-weekdays">
-        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div>
-        <div>Thu</div><div>Fri</div><div>Sat</div>
+        <div>Su</div><div>Mo</div><div>Tu</div><div>We</div>
+        <div>Th</div><div>Fr</div><div>Sa</div>
       </div>
       <div class="cal-days" id="calDays"></div>
     </div>
   </div>
 
-  <!-- View Toggle -->
-  <div class="view-toggle">
-    <button class="view-btn active" data-view="matches" onclick="switchView('matches')">Matches</button>
-    <button class="view-btn" data-view="table" onclick="switchView('table')">Table</button>
-  </div>
-
-  <!-- Content -->
-  <div class="content" id="content">
-    <div class="loading"><div class="spinner"></div>Loading...</div>
+  <!-- Main Layout: Matches + Table side by side -->
+  <div class="main-layout">
+    <div class="panel">
+      <div class="panel-header">⚽ Matches</div>
+      <div class="panel-body" id="matchesPanel">
+        <div class="loading"><div class="spinner"></div>Loading...</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">📊 Standings</div>
+      <div class="panel-body" id="standingsPanel">
+        <div class="loading"><div class="spinner"></div>Loading...</div>
+      </div>
+    </div>
   </div>
 
   <div class="footer">Data from ESPN &bull; Auto-refresh every 60s</div>
 
 <script>
-// ===== CONFIG =====
 const LEAGUES = [
   { id: 'all',              name: 'All',   espn: null, logo: '' },
   { id: 'eng.1',            name: 'EPL',   espn: 'eng.1',          logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/23.png' },
@@ -517,28 +333,24 @@ const LEAGUES = [
   { id: 'uefa.europa',      name: 'UEL',   espn: 'uefa.europa',    logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/2310.png' },
   { id: 'fifa.world',       name: 'WC',    espn: 'fifa.world',     logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/4.png' },
 ];
-
-const ALL_SINGLE_LEAGUES = LEAGUES.filter(l => l.espn !== null);
+const ALL_SINGLE = LEAGUES.filter(l => l.espn !== null);
 
 let currentLeague = 'all';
-let currentView = 'matches';
 let currentDate = new Date();
 let refreshInterval = null;
 let refreshCount = 60;
 let calViewDate = new Date();
 
-// ===== INIT =====
 function init() {
   renderTabs();
   updateDateDisplay();
-  loadData();
+  loadAll();
   startRefreshTimer();
 }
 
 // ===== TABS =====
 function renderTabs() {
-  const container = document.getElementById('leagueTabs');
-  container.innerHTML = LEAGUES.map(l =>
+  document.getElementById('leagueTabs').innerHTML = LEAGUES.map(l =>
     `<div class="league-tab ${l.id === currentLeague ? 'active' : ''}"
           onclick="selectLeague('${l.id}')">
       ${l.logo ? `<img src="${l.logo}" alt="" onerror="this.style.display='none'">` : ''}
@@ -546,11 +358,10 @@ function renderTabs() {
     </div>`
   ).join('');
 }
-
 function selectLeague(id) {
   currentLeague = id;
   renderTabs();
-  loadData();
+  loadAll();
 }
 
 // ===== DATE =====
@@ -559,31 +370,23 @@ function formatDate(d) {
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
-
 function getDateStr(d) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${y}${m}${dd}`;
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
 }
-
 function updateDateDisplay() {
-  const today = new Date();
-  const isToday = currentDate.toDateString() === today.toDateString();
+  const isToday = currentDate.toDateString() === new Date().toDateString();
   document.getElementById('dateDisplay').textContent =
     (isToday ? '📅 Today - ' : '📅 ') + formatDate(currentDate);
 }
-
 function changeDate(delta) {
   currentDate.setDate(currentDate.getDate() + delta);
   updateDateDisplay();
-  loadData();
+  loadAll();
 }
-
 function goToday() {
   currentDate = new Date();
   updateDateDisplay();
-  loadData();
+  loadAll();
 }
 
 // ===== CALENDAR =====
@@ -592,214 +395,194 @@ function openCalendar() {
   renderCalendar();
   document.getElementById('calendarOverlay').classList.add('show');
 }
-
 function closeCalendar(e) {
   if (e && e.target !== document.getElementById('calendarOverlay')) return;
   document.getElementById('calendarOverlay').classList.remove('show');
 }
-
 function calChangeMonth(delta) {
   calViewDate.setMonth(calViewDate.getMonth() + delta);
   renderCalendar();
 }
-
 function renderCalendar() {
   const months = ['January','February','March','April','May','June',
                   'July','August','September','October','November','December'];
-  const year = calViewDate.getFullYear();
-  const month = calViewDate.getMonth();
-
-  document.getElementById('calTitle').textContent = `${months[month]} ${year}`;
-
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const daysInPrev = new Date(year, month, 0).getDate();
-
+  const y = calViewDate.getFullYear(), m = calViewDate.getMonth();
+  document.getElementById('calTitle').textContent = `${months[m]} ${y}`;
+  const firstDay = new Date(y, m, 1).getDay();
+  const dim = new Date(y, m+1, 0).getDate();
+  const prevDim = new Date(y, m, 0).getDate();
   const today = new Date();
   let html = '';
-
-  // Previous month padding
-  for (let i = firstDay - 1; i >= 0; i--) {
-    const d = daysInPrev - i;
-    html += `<button class="cal-day other-month" onclick="selectCalDate(${year},${month - 1},${d})">${d}</button>`;
+  for (let i = firstDay-1; i >= 0; i--)
+    html += `<button class="cal-day other-month" onclick="selectCalDate(${y},${m-1},${prevDim-i})">${prevDim-i}</button>`;
+  for (let d = 1; d <= dim; d++) {
+    const isT = d===today.getDate() && m===today.getMonth() && y===today.getFullYear();
+    const isS = d===currentDate.getDate() && m===currentDate.getMonth() && y===currentDate.getFullYear();
+    html += `<button class="cal-day${isT?' today':''}${isS?' selected':''}" onclick="selectCalDate(${y},${m},${d})">${d}</button>`;
   }
-
-  // Current month
-  for (let d = 1; d <= daysInMonth; d++) {
-    const isToday = (d === today.getDate() && month === today.getMonth() && year === today.getFullYear());
-    const isSelected = (d === currentDate.getDate() && month === currentDate.getMonth() && year === currentDate.getFullYear());
-    let cls = 'cal-day';
-    if (isToday) cls += ' today';
-    if (isSelected) cls += ' selected';
-    html += `<button class="${cls}" onclick="selectCalDate(${year},${month},${d})">${d}</button>`;
-  }
-
-  // Next month padding
-  const totalCells = firstDay + daysInMonth;
-  const remaining = (7 - (totalCells % 7)) % 7;
-  for (let d = 1; d <= remaining; d++) {
-    html += `<button class="cal-day other-month" onclick="selectCalDate(${year},${month + 1},${d})">${d}</button>`;
-  }
-
+  const rem = (7 - ((firstDay + dim) % 7)) % 7;
+  for (let d = 1; d <= rem; d++)
+    html += `<button class="cal-day other-month" onclick="selectCalDate(${y},${m+1},${d})">${d}</button>`;
   document.getElementById('calDays').innerHTML = html;
 }
-
-function selectCalDate(year, month, day) {
-  currentDate = new Date(year, month, day);
+function selectCalDate(y, m, d) {
+  currentDate = new Date(y, m, d);
   updateDateDisplay();
-  loadData();
+  loadAll();
   document.getElementById('calendarOverlay').classList.remove('show');
 }
 
-// ===== VIEW =====
-function switchView(view) {
-  currentView = view;
-  document.querySelectorAll('.view-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.view === view);
-  });
-  loadData();
+// ===== UK TIME =====
+function getUKTime(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', timeZone:'Europe/London' });
+}
+function getLocalTime(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
 }
 
-// ===== FETCH DATA =====
+// ===== FETCH =====
 async function fetchESPN(league, dateStr) {
-  const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard?dates=${dateStr}`;
   try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    return await res.json();
-  } catch (e) {
-    console.error(`Failed to fetch ${league}:`, e);
-    return null;
-  }
+    const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard?dates=${dateStr}`);
+    return r.ok ? await r.json() : null;
+  } catch(e) { return null; }
 }
-
 async function fetchStandings(league) {
-  const url = `https://site.api.espn.com/apis/v2/sports/soccer/${league}/standings`;
   try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    return await res.json();
-  } catch (e) {
-    console.error(`Failed to fetch standings ${league}:`, e);
-    return null;
-  }
+    const r = await fetch(`https://site.api.espn.com/apis/v2/sports/soccer/${league}/standings`);
+    return r.ok ? await r.json() : null;
+  } catch(e) { return null; }
 }
 
-// ===== LOAD DATA =====
-async function loadData() {
-  const content = document.getElementById('content');
-  content.innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
-
-  if (currentView === 'matches') {
-    await loadMatches();
-  } else {
-    await loadStandings();
-  }
+// ===== LOAD ALL (matches + standings together) =====
+async function loadAll() {
+  loadMatches();
+  loadStandings();
 }
 
 async function loadMatches() {
-  const content = document.getElementById('content');
+  const panel = document.getElementById('matchesPanel');
+  panel.innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
   const dateStr = getDateStr(currentDate);
-
-  let leagues = currentLeague === 'all'
-    ? ALL_SINGLE_LEAGUES
-    : LEAGUES.filter(l => l.id === currentLeague);
+  const leagues = currentLeague === 'all' ? ALL_SINGLE : LEAGUES.filter(l => l.id === currentLeague);
 
   const results = await Promise.all(
-    leagues.map(async (league) => {
-      const data = await fetchESPN(league.espn, dateStr);
-      return { league, data };
-    })
+    leagues.map(async lg => ({ league: lg, data: await fetchESPN(lg.espn, dateStr) }))
   );
 
   let html = '';
-  let totalMatches = 0;
+  let total = 0;
 
   for (const { league, data } of results) {
-    if (!data || !data.events || data.events.length === 0) continue;
-
-    const leagueName = data.leagues?.[0]?.name || league.name;
-    const leagueLogo = data.leagues?.[0]?.logos?.[0]?.href || '';
-
+    if (!data?.events?.length) continue;
+    const lName = data.leagues?.[0]?.name || league.name;
+    const lLogo = data.leagues?.[0]?.logos?.[0]?.href || '';
     html += `<div class="match-group-title">
-      ${leagueLogo ? `<img src="${leagueLogo}" alt="">` : ''}
-      ${leagueName}
+      ${lLogo ? `<img src="${lLogo}" alt="">` : ''} ${lName}
     </div>`;
 
     for (const event of data.events) {
-      totalMatches++;
+      total++;
       const comp = event.competitions?.[0];
       if (!comp) continue;
-
-      const status = comp.status;
-      const isLive = status?.type?.state === 'in';
-      const isFinal = status?.type?.state === 'post';
-      const isPre = status?.type?.state === 'pre';
+      const st = comp.status;
+      const isLive = st?.type?.state === 'in';
+      const isFinal = st?.type?.state === 'post';
+      const isPre = st?.type?.state === 'pre';
 
       const home = comp.competitors?.find(c => c.homeAway === 'home');
       const away = comp.competitors?.find(c => c.homeAway === 'away');
-
       if (!home || !away) continue;
 
-      const homeScore = parseInt(home.score) || 0;
-      const awayScore = parseInt(away.score) || 0;
-      const homeWin = isFinal && homeScore > awayScore;
-      const awayWin = isFinal && awayScore > homeScore;
+      const hScore = parseInt(home.score)||0, aScore = parseInt(away.score)||0;
+      const hWin = isFinal && hScore > aScore, aWin = isFinal && aScore > hScore;
 
-      let timeDisplay = '';
+      // Time display
+      let timeHtml = '';
       if (isPre) {
-        const d = new Date(event.date);
-        timeDisplay = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        const local = getLocalTime(event.date);
+        const uk = getUKTime(event.date);
+        timeHtml = `${local}<span class="uk-time">UK ${uk}</span>`;
       } else if (isLive) {
-        timeDisplay = status?.displayClock || 'LIVE';
+        timeHtml = st?.displayClock || 'LIVE';
       } else {
-        timeDisplay = 'FT';
+        timeHtml = 'FT';
       }
 
-      let statusClass = '';
-      let statusText = '';
-      if (isLive) {
-        statusClass = 'live';
-        statusText = status?.type?.shortDetail || 'LIVE';
-      } else if (isFinal) {
-        statusClass = 'ft';
-        statusText = status?.type?.shortDetail || 'FT';
-      } else {
-        statusText = 'Scheduled';
+      let stClass = '', stText = '';
+      if (isLive) { stClass = 'live'; stText = st?.type?.shortDetail || 'LIVE'; }
+      else if (isFinal) { stClass = 'ft'; stText = st?.type?.shortDetail || 'FT'; }
+      else { stText = 'Scheduled'; }
+
+      // Match details (goals, cards)
+      let detailsHtml = '';
+      const details = comp.details || [];
+      if (details.length > 0 && !isPre) {
+        detailsHtml = '<div class="match-details">';
+        for (const det of details) {
+          const typeName = det.type?.text || '';
+          const player = det.athletesInvolved?.[0]?.displayName || '';
+          const minute = det.clock?.displayValue || '';
+          let icon = '', cls = '';
+
+          if (typeName.includes('Goal') || typeName.includes('Penalty - Scored')) {
+            icon = '⚽'; cls = 'detail-goal';
+          } else if (typeName.includes('Own Goal')) {
+            icon = '⚽'; cls = 'detail-red';
+          } else if (typeName.includes('Yellow')) {
+            icon = '🟨'; cls = 'detail-yellow';
+          } else if (typeName.includes('Red') || typeName.includes('Second Yellow')) {
+            icon = '🟥'; cls = 'detail-red';
+          } else {
+            continue;
+          }
+
+          if (player) {
+            const ogTag = typeName.includes('Own Goal') ? ' (OG)' : '';
+            const penTag = typeName.includes('Penalty') ? ' (P)' : '';
+            detailsHtml += `<div class="match-detail-row">
+              <span class="detail-icon">${icon}</span>
+              <span class="detail-minute">${minute}'</span>
+              <span class="detail-player ${cls}">${player}${ogTag}${penTag}</span>
+            </div>`;
+          }
+        }
+        detailsHtml += '</div>';
       }
 
-      html += `
-        <div class="match-card ${isLive ? 'live' : ''}">
-          <div class="match-time ${isLive ? 'live-time' : ''}">${timeDisplay}</div>
+      html += `<div class="match-card ${isLive ? 'live' : ''}">
+        <div class="match-main">
+          <div class="match-time ${isLive ? 'live-time' : ''}">${timeHtml}</div>
           <div class="match-teams">
-            <div class="match-team ${homeWin ? 'winner' : (awayWin ? 'loser' : '')}">
-              <img src="${home.team?.logo || ''}" alt="" onerror="this.style.display='none'">
-              <span class="name">${home.team?.shortDisplayName || home.team?.displayName || '?'}</span>
+            <div class="match-team ${hWin?'winner':(aWin?'loser':'')}">
+              <img src="${home.team?.logo||''}" alt="" onerror="this.style.display='none'">
+              <span class="name">${home.team?.shortDisplayName||home.team?.displayName||'?'}</span>
               ${!isPre ? `<span class="score">${home.score}</span>` : ''}
             </div>
-            <div class="match-team ${awayWin ? 'winner' : (homeWin ? 'loser' : '')}">
-              <img src="${away.team?.logo || ''}" alt="" onerror="this.style.display='none'">
-              <span class="name">${away.team?.shortDisplayName || away.team?.displayName || '?'}</span>
+            <div class="match-team ${aWin?'winner':(hWin?'loser':'')}">
+              <img src="${away.team?.logo||''}" alt="" onerror="this.style.display='none'">
+              <span class="name">${away.team?.shortDisplayName||away.team?.displayName||'?'}</span>
               ${!isPre ? `<span class="score">${away.score}</span>` : ''}
             </div>
           </div>
-          <div class="match-status ${statusClass}">${statusText}</div>
-        </div>`;
+          <div class="match-status ${stClass}">${stText}</div>
+        </div>
+        ${detailsHtml}
+      </div>`;
     }
   }
 
-  if (totalMatches === 0) {
-    html = `<div class="no-matches">
-      <div class="icon">⚽</div>
-      No matches on this day.<br>Try another date!
-    </div>`;
+  if (total === 0) {
+    html = '<div class="no-matches"><div class="icon">⚽</div>No matches on this day.<br>Try another date!</div>';
   }
-
-  content.innerHTML = html;
+  panel.innerHTML = html;
 }
 
 async function loadStandings() {
-  const content = document.getElementById('content');
+  const panel = document.getElementById('standingsPanel');
+  panel.innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
 
   let league;
   if (currentLeague === 'all') {
@@ -808,167 +591,103 @@ async function loadStandings() {
     league = LEAGUES.find(l => l.id === currentLeague);
   }
 
-  if (!league || !league.espn) {
-    content.innerHTML = '<div class="no-matches"><div class="icon">📊</div>Select a league to view standings.</div>';
+  if (!league?.espn) {
+    panel.innerHTML = '<div class="no-matches"><div class="icon">📊</div>Select a league to view standings.</div>';
     return;
   }
 
   const data = await fetchStandings(league.espn);
-
-  if (!data || !data.children || data.children.length === 0) {
-    content.innerHTML = '<div class="no-matches"><div class="icon">📊</div>Standings not available for this competition.</div>';
+  if (!data?.children?.[0]) {
+    panel.innerHTML = '<div class="no-matches"><div class="icon">📊</div>Standings not available.</div>';
     return;
   }
 
-  const group = data.children[0];
-  const standings = group?.standings?.entries || [];
-
-  if (standings.length === 0) {
-    content.innerHTML = '<div class="no-matches"><div class="icon">📊</div>No standings data available.</div>';
+  const entries = data.children[0]?.standings?.entries || [];
+  if (!entries.length) {
+    panel.innerHTML = '<div class="no-matches"><div class="icon">📊</div>No data.</div>';
     return;
   }
 
-  standings.sort((a, b) => {
-    const rankA = a.stats?.find(s => s.name === 'rank')?.value || 99;
-    const rankB = b.stats?.find(s => s.name === 'rank')?.value || 99;
-    return rankA - rankB;
+  entries.sort((a,b) => {
+    const ra = a.stats?.find(s=>s.name==='rank')?.value||99;
+    const rb = b.stats?.find(s=>s.name==='rank')?.value||99;
+    return ra - rb;
   });
 
-  const leagueName = data.children[0]?.standings?.name || league.name;
-  let totalTeams = standings.length;
+  const total = entries.length;
+  let html = `<table class="standings-table"><thead><tr>
+    <th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th>
+  </tr></thead><tbody>`;
 
-  let html = `<div class="match-group-title">📊 ${leagueName}</div>`;
-  html += `<table class="standings-table">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Team</th>
-        <th>P</th>
-        <th>W</th>
-        <th>D</th>
-        <th>L</th>
-        <th>GD</th>
-        <th>Pts</th>
-      </tr>
-    </thead>
-    <tbody>`;
-
-  for (const entry of standings) {
-    const team = entry.team;
-    const stats = {};
-    (entry.stats || []).forEach(s => { stats[s.name] = s.value; });
-
-    const rank = stats.rank || '-';
-    const played = stats.gamesPlayed || 0;
-    const wins = stats.wins || 0;
-    const draws = stats.ties || 0;
-    const losses = stats.losses || 0;
-    const gd = stats.pointDifferential || stats.goalDifference || 0;
-    const pts = stats.points || 0;
-
-    let posClass = '';
-    if (rank <= 4) posClass = `pos-${rank}`;
-    if (rank > totalTeams - 3) posClass = 'pos-rel';
-
-    html += `<tr class="${posClass}">
+  for (const e of entries) {
+    const t = e.team, s = {};
+    (e.stats||[]).forEach(x => { s[x.name] = x.value; });
+    const rank = s.rank||'-', p = s.gamesPlayed||0, w = s.wins||0;
+    const d = s.ties||0, l = s.losses||0;
+    const gd = s.pointDifferential||s.goalDifference||0, pts = s.points||0;
+    let cls = '';
+    if (rank <= 4) cls = `pos-${rank}`;
+    if (rank > total - 3) cls = 'pos-rel';
+    html += `<tr class="${cls}">
       <td>${rank}</td>
-      <td>
-        <div class="team-cell">
-          <img src="${team?.logos?.[0]?.href || ''}" alt="" onerror="this.style.display='none'">
-          ${team?.shortDisplayName || team?.displayName || '?'}
-        </div>
-      </td>
-      <td>${played}</td>
-      <td>${wins}</td>
-      <td>${draws}</td>
-      <td>${losses}</td>
-      <td>${gd > 0 ? '+' : ''}${gd}</td>
-      <td class="pts">${pts}</td>
+      <td><div class="team-cell">
+        <img src="${t?.logos?.[0]?.href||''}" alt="" onerror="this.style.display='none'">
+        ${t?.shortDisplayName||t?.displayName||'?'}
+      </div></td>
+      <td>${p}</td><td>${w}</td><td>${d}</td><td>${l}</td>
+      <td>${gd>0?'+':''}${gd}</td><td class="pts">${pts}</td>
     </tr>`;
   }
-
   html += '</tbody></table>';
-  content.innerHTML = html;
+  panel.innerHTML = html;
 }
 
 // ===== AUTO REFRESH =====
 function startRefreshTimer() {
   if (refreshInterval) clearInterval(refreshInterval);
   refreshCount = 60;
-
   refreshInterval = setInterval(() => {
     refreshCount--;
     document.getElementById('refreshTimer').textContent = `${refreshCount}s`;
-
-    if (refreshCount <= 0) {
-      refreshCount = 60;
-      loadData();
-    }
+    if (refreshCount <= 0) { refreshCount = 60; loadAll(); }
   }, 1000);
 }
 
 // ===== KIOSK MODE =====
 document.addEventListener('click', function(e) {
-  const link = e.target.closest('a');
-  if (link) {
-    const href = link.getAttribute('href');
-    if (href && (href.startsWith('http') || href.startsWith('//') || href.startsWith('mailto'))) {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    }
+  const a = e.target.closest('a');
+  if (a) { const h = a.getAttribute('href');
+    if (h && (h.startsWith('http')||h.startsWith('//')||h.startsWith('mailto')))
+    { e.preventDefault(); e.stopPropagation(); return false; }
   }
 }, true);
-
 window.open = function() { return null; };
-
-document.addEventListener('contextmenu', function(e) {
-  e.preventDefault();
-  return false;
+document.addEventListener('contextmenu', e => { e.preventDefault(); });
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey||e.metaKey) && ['t','n','l','w'].includes(e.key.toLowerCase()))
+  { e.preventDefault(); }
 });
-
-document.addEventListener('touchstart', function(e) {}, { passive: true });
-
-document.addEventListener('keydown', function(e) {
-  if (e.ctrlKey || e.metaKey) {
-    if (['t','n','l','w'].includes(e.key.toLowerCase())) {
-      e.preventDefault();
-      return false;
-    }
-  }
-});
-
-document.addEventListener('dragstart', function(e) {
-  e.preventDefault();
-});
-
-let fullscreenRequested = false;
-document.addEventListener('click', function() {
-  if (!fullscreenRequested && document.documentElement.requestFullscreen) {
-    document.documentElement.requestFullscreen().catch(() => {});
-    fullscreenRequested = true;
-  } else if (!fullscreenRequested && document.documentElement.webkitRequestFullscreen) {
+document.addEventListener('dragstart', e => e.preventDefault());
+let fsReq = false;
+document.addEventListener('click', () => {
+  if (!fsReq && document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen().catch(()=>{});
+    fsReq = true;
+  } else if (!fsReq && document.documentElement.webkitRequestFullscreen) {
     document.documentElement.webkitRequestFullscreen();
-    fullscreenRequested = true;
+    fsReq = true;
   }
 }, { once: true });
-
-document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
-document.addEventListener('gesturechange', function(e) { e.preventDefault(); });
-
-window.addEventListener('popstate', function() {
-  history.pushState(null, '', window.location.href);
-});
-history.pushState(null, '', window.location.href);
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('gesturechange', e => e.preventDefault());
+window.addEventListener('popstate', () => history.pushState(null,'',window.location.href));
+history.pushState(null,'',window.location.href);
 
 // ===== SERVICE WORKER =====
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js')
-    .then(() => console.log('SW registered'))
-    .catch(e => console.log('SW failed:', e));
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
 
-// ===== START =====
 init();
 </script>
 </body>
