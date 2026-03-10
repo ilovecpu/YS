@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FoxAway - 여우 퇴치 고주파 발생기</title>
+<style>
+:root{--bg:#0a0e1a;--bg2:#111827;--bg3:#1f2937;--primary:#f59e0b;--accent:#ef4444;--success:#10b981;--text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;--border:#374151}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.05);opacity:.8}}
+@keyframes ripple{0%{transform:scale(.8);opacity:.8}100%{transform:scale(2.5);opacity:0}}
+@keyframes sweep{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes radar{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+@keyframes waveExpand{0%{r:30;opacity:.6}100%{r:120;opacity:0}}
+.app{max-width:600px;margin:0 auto;padding:1.5rem;min-height:100vh;display:flex;flex-direction:column}
+
+/* Header */
+.header{text-align:center;padding:1.5rem 0;margin-bottom:1rem}
+.header h1{font-size:1.8rem;font-weight:800;margin-bottom:.3rem}
+.header h1 span{color:var(--primary)}
+.header p{color:var(--text2);font-size:.9rem}
+
+/* Warning */
+.warning{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:12px;padding:1rem;margin-bottom:1.5rem;font-size:.85rem;color:#fca5a5;line-height:1.6}
+.warning strong{color:var(--accent)}
+
+/* Main Control */
+.main-control{text-align:center;margin-bottom:1.5rem}
+.power-btn-wrap{position:relative;width:180px;height:180px;margin:0 auto 1.5rem}
+.power-waves{position:absolute;inset:0;border-radius:50%}
+.power-wave{position:absolute;inset:0;border-radius:50%;border:2px solid var(--accent);opacity:0}
+.active .power-wave{animation:ripple 2s ease-out infinite}
+.active .power-wave:nth-child(2){animation-delay:.4s}
+.active .power-wave:nth-child(3){animation-delay:.8s}
+.power-btn{width:180px;height:180px;border-radius:50%;border:4px solid var(--border);background:radial-gradient(circle at 40% 35%,#2a2a3a,#1a1a2a);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:all .3s;position:relative;z-index:2;user-select:none}
+.power-btn:hover{border-color:var(--primary)}
+.power-btn.on{border-color:var(--accent);box-shadow:0 0 40px rgba(239,68,68,.3);animation:pulse 2s ease-in-out infinite}
+.power-btn .icon{font-size:3rem;transition:all .3s}
+.power-btn.on .icon{color:var(--accent)}
+.power-btn .label{font-size:.9rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px}
+.power-btn.on .label{color:var(--accent)}
+
+/* Status */
+.status{text-align:center;padding:.8rem;border-radius:10px;margin-bottom:1.5rem;font-weight:600;font-size:.95rem}
+.status.off{background:var(--bg3);color:var(--text3)}
+.status.on{background:rgba(239,68,68,.15);color:var(--accent);border:1px solid rgba(239,68,68,.3)}
+
+/* Radar visualization */
+.radar-wrap{width:200px;height:200px;margin:0 auto 1.5rem;position:relative;display:none}
+.radar-wrap.active{display:block}
+.radar-bg{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle,rgba(239,68,68,.05),rgba(239,68,68,.02),transparent);border:1px solid rgba(239,68,68,.2);position:relative;overflow:hidden}
+.radar-line{position:absolute;top:50%;left:50%;width:50%;height:2px;background:linear-gradient(90deg,var(--accent),transparent);transform-origin:left center;animation:radar 3s linear infinite}
+.radar-ring{position:absolute;border-radius:50%;border:1px solid rgba(239,68,68,.1);top:50%;left:50%;transform:translate(-50%,-50%)}
+.radar-ring:nth-child(2){width:33%;height:33%}
+.radar-ring:nth-child(3){width:66%;height:66%}
+.radar-ring:nth-child(4){width:100%;height:100%}
+.radar-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+
+/* Mode selector */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:1.2rem;margin-bottom:1rem}
+.card-title{font-size:.85rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.8rem;display:flex;align-items:center;gap:8px}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.mode-btn{padding:.8rem;border-radius:10px;border:2px solid var(--border);background:var(--bg);cursor:pointer;text-align:center;transition:all .2s}
+.mode-btn:hover{border-color:var(--primary)}
+.mode-btn.active{border-color:var(--accent);background:rgba(239,68,68,.08)}
+.mode-btn .mode-icon{font-size:1.5rem;margin-bottom:4px}
+.mode-btn .mode-name{font-size:.85rem;font-weight:600;display:block}
+.mode-btn .mode-desc{font-size:.7rem;color:var(--text3);display:block;margin-top:2px}
+
+/* Frequency display */
+.freq-display{text-align:center;padding:1rem 0;margin-bottom:.5rem}
+.freq-value{font-size:2.5rem;font-weight:800;color:var(--primary);font-variant-numeric:tabular-nums}
+.freq-unit{font-size:1rem;color:var(--text2);margin-left:4px}
+.freq-range{display:flex;justify-content:space-between;font-size:.75rem;color:var(--text3);margin-top:4px;padding:0 4px}
+
+/* Slider */
+.slider-wrap{padding:0 4px}
+.slider{-webkit-appearance:none;width:100%;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--primary),var(--accent));outline:none;margin:8px 0}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff,#ddd);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+
+/* Volume knob */
+.knob-section{display:flex;align-items:center;justify-content:center;gap:2rem;padding:1rem 0}
+.knob-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;user-select:none}
+.knob-label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text2)}
+.knob-outer{position:relative;width:80px;height:80px;border-radius:50%;background:radial-gradient(ellipse at 35% 30%,#3a3a4a,#1a1a2a);box-shadow:0 4px 12px rgba(0,0,0,.5),inset 0 1px 3px rgba(255,255,255,.05);cursor:grab;touch-action:none}
+.knob-outer:active{cursor:grabbing}
+.knob-inner{position:absolute;inset:5px;border-radius:50%;display:flex;align-items:flex-start;justify-content:center}
+.knob-indicator{width:3px;height:14px;margin-top:8px;border-radius:2px;background:var(--accent);box-shadow:0 0 6px var(--accent)}
+.knob-val{font-size:1rem;font-weight:800;color:var(--primary);font-variant-numeric:tabular-nums}
+
+/* Pattern selector */
+.patterns{display:flex;gap:.5rem;flex-wrap:wrap}
+.pat-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg);cursor:pointer;font-size:.8rem;font-weight:600;color:var(--text2);transition:all .2s}
+.pat-btn:hover{border-color:var(--primary);color:var(--text)}
+.pat-btn.active{border-color:var(--accent);background:rgba(239,68,68,.1);color:var(--accent)}
+
+/* Timer */
+.timer-section{display:flex;align-items:center;justify-content:center;gap:1rem;padding:.5rem 0}
+.timer-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--text2);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.timer-btn:hover{border-color:var(--primary);color:var(--text)}
+.timer-val{font-size:1.1rem;font-weight:700;min-width:80px;text-align:center;color:var(--primary)}
+
+/* Info section */
+.info{padding:1rem;background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.2);border-radius:12px;margin-top:auto}
+.info h4{color:var(--primary);margin-bottom:.5rem;font-size:.9rem}
+.info p{font-size:.8rem;color:var(--text2);line-height:1.7}
+
+/* Footer */
+.footer{text-align:center;padding:1.5rem 0;font-size:.75rem;color:var(--text3)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script type="text/babel">
+const { useState, useRef, useEffect, useCallback } = React;
+
+// Audio engine for high-frequency generation
+class UltrasonicEngine {
+  constructor() {
+    this.ctx = null;
+    this.nodes = {};
+    this.sweepInterval = null;
+    this.burstInterval = null;
+  }
+  init() {
+    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+  }
+  stop() {
+    if (this.sweepInterval) { clearInterval(this.sweepInterval); this.sweepInterval = null; }
+    if (this.burstInterval) { clearInterval(this.burstInterval); this.burstInterval = null; }
+    if (this.nodes.osc) { try { this.nodes.osc.stop(); } catch(e){} }
+    if (this.nodes.osc2) { try { this.nodes.osc2.stop(); } catch(e){} }
+    this.nodes = {};
+  }
+  // Continuous high-frequency tone
+  playContinuous(freq, vol) {
+    this.stop();
+    this.init();
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(vol, this.ctx.currentTime + 0.5);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    this.nodes = { osc, gain };
+  }
+  // Sweep between two frequencies
+  playSweep(freqLow, freqHigh, vol, speed) {
+    this.stop();
+    this.init();
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freqLow;
+    gain.gain.setValueAtTime(0, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(vol, this.ctx.currentTime + 0.3);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    this.nodes = { osc, gain };
+    let goingUp = true;
+    const duration = speed === 'fast' ? 0.5 : speed === 'slow' ? 2 : 1;
+    this.sweepInterval = setInterval(() => {
+      if (!this.nodes.osc) return;
+      const target = goingUp ? freqHigh : freqLow;
+      this.nodes.osc.frequency.linearRampToValueAtTime(target, this.ctx.currentTime + duration);
+      goingUp = !goingUp;
+    }, duration * 1000);
+  }
+  // Burst pattern (on/off)
+  playBurst(freq, vol, onTime, offTime) {
+    this.stop();
+    this.init();
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.value = 0;
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    this.nodes = { osc, gain };
+    let isOn = false;
+    const toggle = () => {
+      if (!this.nodes.gain) return;
+      isOn = !isOn;
+      const t = this.ctx.currentTime;
+      if (isOn) {
+        this.nodes.gain.gain.setValueAtTime(0, t);
+        this.nodes.gain.gain.linearRampToValueAtTime(vol, t + 0.05);
+      } else {
+        this.nodes.gain.gain.setValueAtTime(vol, t);
+        this.nodes.gain.gain.linearRampToValueAtTime(0, t + 0.05);
+      }
+    };
+    toggle(); // start on
+    this.burstInterval = setInterval(toggle, isOn ? onTime : offTime);
+    // Alternate timing
+    let count = 0;
+    clearInterval(this.burstInterval);
+    const step = () => {
+      if (!this.nodes.gain) return;
+      toggle();
+      count++;
+      this.burstInterval = setTimeout(step, count % 2 === 0 ? offTime : onTime);
+    };
+    step();
+  }
+  // Random frequency hopping (most effective for animals)
+  playRandom(freqMin, freqMax, vol) {
+    this.stop();
+    this.init();
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freqMin;
+    gain.gain.setValueAtTime(0, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(vol, this.ctx.currentTime + 0.3);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start();
+    this.nodes = { osc, gain };
+    this.sweepInterval = setInterval(() => {
+      if (!this.nodes.osc) return;
+      const randFreq = freqMin + Math.random() * (freqMax - freqMin);
+      this.nodes.osc.frequency.linearRampToValueAtTime(randFreq, this.ctx.currentTime + 0.1);
+    }, 300 + Math.random() * 400);
+  }
+  // Dual tone (two frequencies simultaneously)
+  playDual(freq1, freq2, vol) {
+    this.stop();
+    this.init();
+    const osc1 = this.ctx.createOscillator();
+    const osc2 = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc1.type = 'sine';
+    osc2.type = 'square';
+    osc1.frequency.value = freq1;
+    osc2.frequency.value = freq2;
+    gain.gain.setValueAtTime(0, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(vol * 0.7, this.ctx.currentTime + 0.5);
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc1.start();
+    osc2.start();
+    this.nodes = { osc: osc1, osc2, gain };
+  }
+  setFreq(f) {
+    if (this.nodes.osc) this.nodes.osc.frequency.linearRampToValueAtTime(f, this.ctx.currentTime + 0.1);
+  }
+  setVol(v) {
+    if (this.nodes.gain) this.nodes.gain.gain.linearRampToValueAtTime(v, this.ctx.currentTime + 0.1);
+  }
+}
+
+const engine = new UltrasonicEngine();
+
+function App() {
+  const [isOn, setIsOn] = useState(false);
+  const [freq, setFreq] = useState(17000);
+  const [vol, setVol] = useState(80);
+  const [mode, setMode] = useState('sweep'); // continuous, sweep, burst, random
+  const [pattern, setPattern] = useState('normal'); // normal, aggressive, stealth
+  const [timerMin, setTimerMin] = useState(0); // 0 = no timer
+  const [timeLeft, setTimeLeft] = useState(null);
+  const timerRef = useRef(null);
+  const knobRef = useRef(null);
+  const dragging = useRef(false);
+  const startY = useRef(0);
+  const startVal = useRef(0);
+
+  // Cleanup
+  useEffect(() => {
+    return () => { engine.stop(); if(timerRef.current) clearInterval(timerRef.current); };
+  }, []);
+
+  // Timer countdown
+  useEffect(() => {
+    if (timeLeft !== null && timeLeft <= 0) {
+      handlePower(false);
+      setTimeLeft(null);
+    }
+  }, [timeLeft]);
+
+  const startSound = useCallback((f, v, m, p) => {
+    const volume = v / 100 * 0.5; // max 50% gain
+    const freqLow = Math.max(f - 2000, 14000);
+    const freqHigh = Math.min(f + 2000, 22000);
+
+    switch(m) {
+      case 'continuous':
+        engine.playContinuous(f, volume);
+        break;
+      case 'sweep':
+        const speed = p === 'aggressive' ? 'fast' : p === 'stealth' ? 'slow' : 'normal';
+        engine.playSweep(freqLow, freqHigh, volume, speed);
+        break;
+      case 'burst':
+        const onT = p === 'aggressive' ? 200 : p === 'stealth' ? 1000 : 500;
+        const offT = p === 'aggressive' ? 100 : p === 'stealth' ? 500 : 300;
+        engine.playBurst(f, volume, onT, offT);
+        break;
+      case 'random':
+        engine.playRandom(freqLow, freqHigh, volume);
+        break;
+      default:
+        engine.playContinuous(f, volume);
+    }
+  }, []);
+
+  const handlePower = (turnOn) => {
+    if (turnOn) {
+      startSound(freq, vol, mode, pattern);
+      setIsOn(true);
+      if (timerMin > 0) {
+        setTimeLeft(timerMin * 60);
+        timerRef.current = setInterval(() => setTimeLeft(t => t !== null ? t - 1 : null), 1000);
+      }
+    } else {
+      engine.stop();
+      setIsOn(false);
+      setTimeLeft(null);
+      if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    }
+  };
+
+  const handleFreqChange = (f) => {
+    setFreq(f);
+    if (isOn) {
+      engine.stop();
+      startSound(f, vol, mode, pattern);
+    }
+  };
+
+  const handleModeChange = (m) => {
+    setMode(m);
+    if (isOn) {
+      engine.stop();
+      startSound(freq, vol, m, pattern);
+    }
+  };
+
+  const handlePatternChange = (p) => {
+    setPattern(p);
+    if (isOn) {
+      engine.stop();
+      startSound(freq, vol, mode, p);
+    }
+  };
+
+  // Volume knob drag
+  const handleKnobStart = (e) => {
+    e.preventDefault();
+    dragging.current = true;
+    const pt = e.touches ? e.touches[0] : e;
+    startY.current = pt.clientY;
+    startVal.current = vol;
+    const onMove = (ev) => {
+      if (!dragging.current) return;
+      const p = ev.touches ? ev.touches[0] : ev;
+      const dy = startY.current - p.clientY;
+      const newVal = Math.max(0, Math.min(100, startVal.current + Math.round(dy * 0.5)));
+      setVol(newVal);
+      if (isOn) engine.setVol(newVal / 100 * 0.5);
+    };
+    const onEnd = () => {
+      dragging.current = false;
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onEnd);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('touchend', onEnd);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onEnd);
+    window.addEventListener('touchmove', onMove, {passive:false});
+    window.addEventListener('touchend', onEnd);
+  };
+
+  const knobAngle = -135 + (vol / 100) * 270;
+  const formatTime = (s) => {
+    if (s === null) return '';
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  };
+
+  const modes = [
+    { id: 'continuous', icon: '〰️', name: '연속', desc: 'Continuous' },
+    { id: 'sweep', icon: '📡', name: '스윕', desc: 'Frequency Sweep' },
+    { id: 'burst', icon: '💥', name: '버스트', desc: 'On/Off Burst' },
+    { id: 'random', icon: '🎲', name: '랜덤', desc: 'Random Hop' },
+  ];
+
+  return (
+    <div className="app">
+      <div className="header">
+        <h1>🦊 Fox<span>Away</span></h1>
+        <p>고주파 초음파 여우 퇴치기</p>
+      </div>
+
+      {/* Warning */}
+      <div className="warning">
+        <strong>⚠️ 주의:</strong> 이 앱은 15kHz~22kHz 고주파를 발생시킵니다.
+        사람(특히 어린이)과 반려동물(개, 고양이)에게도 불쾌감을 줄 수 있습니다.
+        사용 시 사람과 반려동물이 없는 환경에서 사용하세요.
+        장시간 고출력 사용 시 스피커가 손상될 수 있습니다.
+      </div>
+
+      {/* Power Button */}
+      <div className="main-control">
+        <div className={`power-btn-wrap ${isOn ? 'active' : ''}`}>
+          <div className="power-waves">
+            <div className="power-wave"></div>
+            <div className="power-wave"></div>
+            <div className="power-wave"></div>
+          </div>
+          <div className={`power-btn ${isOn ? 'on' : ''}`}
+            onClick={() => handlePower(!isOn)}>
+            <div className="icon">{isOn ? '🔴' : '⭕'}</div>
+            <div className="label">{isOn ? '작동중' : '시작'}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Status */}
+      <div className={`status ${isOn ? 'on' : 'off'}`}>
+        {isOn
+          ? <>📡 고주파 발생 중 — {(freq/1000).toFixed(1)}kHz · {modes.find(m=>m.id===mode)?.name}
+              {timeLeft !== null && <> · ⏱ {formatTime(timeLeft)}</>}</>
+          : '대기 중 — 버튼을 눌러 시작하세요'}
+      </div>
+
+      {/* Radar visualization when active */}
+      <div className={`radar-wrap ${isOn ? 'active' : ''}`}>
+        <div className="radar-bg">
+          <div className="radar-line"></div>
+          <div className="radar-ring"></div>
+          <div className="radar-ring"></div>
+          <div className="radar-ring"></div>
+          <div className="radar-center"></div>
+        </div>
+      </div>
+
+      {/* Mode Selection */}
+      <div className="card">
+        <div className="card-title">📻 발생 모드</div>
+        <div className="modes">
+          {modes.map(m => (
+            <div key={m.id} className={`mode-btn ${mode===m.id?'active':''}`}
+              onClick={() => handleModeChange(m.id)}>
+              <div className="mode-icon">{m.icon}</div>
+              <span className="mode-name">{m.name}</span>
+              <span className="mode-desc">{m.desc}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Frequency Control */}
+      <div className="card">
+        <div className="card-title">🎵 주파수 설정</div>
+        <div className="freq-display">
+          <span className="freq-value">{(freq/1000).toFixed(1)}</span>
+          <span className="freq-unit">kHz</span>
+        </div>
+        <div className="slider-wrap">
+          <input type="range" className="slider" min="15000" max="22000" step="100"
+            value={freq} onChange={e => handleFreqChange(parseInt(e.target.value))} />
+          <div className="freq-range">
+            <span>15kHz</span>
+            <span>여우 감지 범위</span>
+            <span>22kHz</span>
+          </div>
+        </div>
+        <div style={{display:'flex',gap:'.5rem',marginTop:'.8rem',flexWrap:'wrap'}}>
+          {[
+            {label:'🦊 여우 최적', freq:17000},
+            {label:'🐾 중형동물', freq:18000},
+            {label:'🐀 설치류', freq:20000},
+            {label:'🦇 최고주파', freq:22000}
+          ].map(p => (
+            <button key={p.freq} onClick={() => handleFreqChange(p.freq)}
+              style={{flex:1,padding:'6px 4px',borderRadius:8,border:freq===p.freq?'1px solid var(--accent)':'1px solid var(--border)',
+                background:freq===p.freq?'rgba(239,68,68,.1)':'var(--bg)',cursor:'pointer',
+                color:freq===p.freq?'var(--accent)':'var(--text2)',fontSize:'.75rem',fontWeight:600,transition:'all .2s'}}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Volume + Pattern */}
+      <div className="card">
+        <div className="card-title">🔊 출력 · 패턴</div>
+        <div className="knob-section">
+          {/* Volume Knob */}
+          <div className="knob-wrap">
+            <div className="knob-label">VOLUME</div>
+            <div className="knob-outer" ref={knobRef}
+              onMouseDown={handleKnobStart} onTouchStart={handleKnobStart}>
+              <div className="knob-inner" style={{transform:`rotate(${knobAngle}deg)`}}>
+                <div className="knob-indicator"></div>
+              </div>
+            </div>
+            <div className="knob-val" style={{color:vol>80?'var(--accent)':vol>50?'var(--primary)':'var(--success)'}}>{vol}%</div>
+          </div>
+          {/* Pattern */}
+          <div style={{flex:1}}>
+            <div style={{fontSize:'.8rem',fontWeight:600,color:'var(--text2)',marginBottom:8}}>패턴</div>
+            <div style={{display:'flex',flexDirection:'column',gap:6}}>
+              {[
+                {id:'normal', label:'일반', desc:'균형 잡힌 패턴'},
+                {id:'aggressive', label:'강력', desc:'빠르고 강한 변화'},
+                {id:'stealth', label:'저소음', desc:'느리고 조용하게'}
+              ].map(p => (
+                <div key={p.id} className={`pat-btn ${pattern===p.id?'active':''}`}
+                  onClick={() => handlePatternChange(p.id)}
+                  style={{display:'flex',alignItems:'center',gap:8}}>
+                  <span>{p.label}</span>
+                  <span style={{fontSize:'.7rem',color:'var(--text3)',marginLeft:'auto'}}>{p.desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Timer */}
+      <div className="card">
+        <div className="card-title">⏱ 자동 종료 타이머</div>
+        <div className="timer-section">
+          <button className="timer-btn" onClick={() => setTimerMin(Math.max(0, timerMin - 5))}>−</button>
+          <div className="timer-val">
+            {timerMin === 0 ? '무제한' : `${timerMin}분`}
+          </div>
+          <button className="timer-btn" onClick={() => setTimerMin(Math.min(120, timerMin + 5))}>+</button>
+        </div>
+        <div style={{display:'flex',gap:'.5rem',justifyContent:'center',marginTop:'.5rem'}}>
+          {[0, 10, 30, 60].map(m => (
+            <button key={m} onClick={() => setTimerMin(m)}
+              style={{padding:'4px 12px',borderRadius:6,border:timerMin===m?'1px solid var(--primary)':'1px solid var(--border)',
+                background:timerMin===m?'rgba(245,158,11,.1)':'transparent',
+                color:timerMin===m?'var(--primary)':'var(--text3)',fontSize:'.8rem',cursor:'pointer',fontWeight:600}}>
+              {m === 0 ? '무제한' : `${m}분`}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Info */}
+      <div className="info">
+        <h4>🦊 여우 퇴치 고주파 안내</h4>
+        <p>
+          여우는 약 16kHz~40kHz 범위의 고주파를 감지합니다.
+          일반 스피커는 최대 20~22kHz까지 출력 가능합니다.
+          <strong style={{color:'var(--primary)'}}> 17~19kHz</strong>가 가장 효과적입니다.
+          스윕 모드나 랜덤 모드가 동물이 적응하기 어려워 효과가 좋습니다.
+          야외에서 블루투스 스피커로 사용하면 더 넓은 범위를 커버할 수 있습니다.
+        </p>
+      </div>
+
+      <div className="footer">
+        © 2026 FoxAway · 동물 퇴치 전용 · 안전하게 사용하세요
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
