@@ -628,6 +628,7 @@ const LEAGUES = [
   { id: 'fra.1',            name: 'L1',    espn: 'fra.1',          logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/9.png' },
   { id: 'uefa.champions',   name: 'UCL',   espn: 'uefa.champions', logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/2.png' },
   { id: 'uefa.europa',      name: 'UEL',   espn: 'uefa.europa',    logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/2310.png' },
+  { id: 'eng.fa',            name: 'FA',    espn: 'eng.fa',         logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/169.png' },
   { id: 'fifa.world',       name: 'WC',    espn: 'fifa.world',     logo: 'https://a.espncdn.com/i/leaguelogos/soccer/500/4.png' },
 ];
 const ALL_SINGLE = LEAGUES.filter(l => l.espn !== null);
@@ -692,8 +693,17 @@ function init() {
 }
 
 // ===== TABS =====
+// 컵 대회는 경기가 있을 때만 탭 표시
+const CUP_ONLY_LEAGUES = ['eng.fa', 'fifa.world'];
+let cupLeaguesWithMatches = new Set();
+
 function renderTabs() {
-  document.getElementById('leagueTabs').innerHTML = LEAGUES.map(l =>
+  document.getElementById('leagueTabs').innerHTML = LEAGUES.filter(l => {
+    if (CUP_ONLY_LEAGUES.includes(l.id)) {
+      return cupLeaguesWithMatches.has(l.id);
+    }
+    return true;
+  }).map(l =>
     `<div class="league-tab ${l.id === currentLeague ? 'active' : ''}"
           onclick="selectLeague('${l.id}')">
       ${l.logo ? `<img src="${l.logo}" alt="" onerror="this.style.display='none'">` : ''}
@@ -913,6 +923,7 @@ const LEAGUE_TZ = {
   'fra.1':          { tz: 'Europe/Paris',    label: 'FRA' },
   'uefa.champions': { tz: 'Europe/London',   label: 'UK' },
   'uefa.europa':    { tz: 'Europe/London',   label: 'UK' },
+  'eng.fa':         { tz: 'Europe/London',   label: 'ENG' },
   'fifa.world':     { tz: 'Europe/London',   label: 'UK' },
 };
 
@@ -959,7 +970,23 @@ async function loadMatches() {
   const dateStr = getDateStr(currentDate);
   const leagues = currentLeague === 'all' ? ALL_SINGLE : LEAGUES.filter(l => l.id === currentLeague);
 
-  const results = await Promise.all(
+  // "All" 모드일 때 컵 대회 경기 유무 체크 (탭 표시용)
+  let allResults;
+  if (currentLeague === 'all') {
+    allResults = await Promise.all(
+      ALL_SINGLE.map(async lg => ({ league: lg, data: await fetchESPN(lg.espn, dateStr) }))
+    );
+    // 컵 대회 탭 표시 업데이트
+    cupLeaguesWithMatches.clear();
+    for (const { league, data } of allResults) {
+      if (CUP_ONLY_LEAGUES.includes(league.id) && data?.events?.length) {
+        cupLeaguesWithMatches.add(league.id);
+      }
+    }
+    renderTabs();
+  }
+
+  const results = allResults || await Promise.all(
     leagues.map(async lg => ({ league: lg, data: await fetchESPN(lg.espn, dateStr) }))
   );
 
@@ -1095,6 +1122,13 @@ async function loadStandings() {
 
   if (!league?.espn) {
     panel.innerHTML = '<div class="no-matches"><div class="icon">📊</div>Select a league to view standings.</div>';
+    return;
+  }
+
+  // 토너먼트(컵) 대회는 리그 순위표가 없음
+  const CUP_LEAGUES = ['eng.fa', 'fifa.world'];
+  if (CUP_LEAGUES.includes(league.espn)) {
+    panel.innerHTML = '<div class="no-matches"><div class="icon">🏆</div>Cup tournament — no league table.<br><small>Match results are shown on the left.</small></div>';
     return;
   }
 
